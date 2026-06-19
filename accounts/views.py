@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -6,8 +9,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Profile
-from .serializers import LoginSerializer, LogoutSerializer, ProfileSerializer, SignupSerializer
+from .models import BodyRecord, Profile
+from .serializers import BodyRecordSerializer, LoginSerializer, LogoutSerializer, ProfileSerializer, SignupSerializer
 
 
 def success_response(message, data=None, status_code=status.HTTP_200_OK):
@@ -204,3 +207,199 @@ def calculate_recommended_calories(profile):
     calories = bmr * activity_multipliers.get(profile.activity_level, 1.2)
     calories += goal_adjustments.get(profile.workout_goal, 0)
     return max(round(calories), 1200)
+
+
+class BodyRecordListCreateView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        records = BodyRecord.objects.filter(user=request.user).select_related('user__profile')
+
+        start_date = request.query_params.get('start_date')
+        if start_date:
+            parsed_start = parse_date(start_date)
+            if parsed_start is None:
+                return error_response(
+                    '신체 기록 목록 조회에 실패했습니다.',
+                    {'start_date': ['날짜 형식은 YYYY-MM-DD이어야 합니다.']},
+                )
+            records = records.filter(record_date__gte=parsed_start)
+
+        end_date = request.query_params.get('end_date')
+        if end_date:
+            parsed_end = parse_date(end_date)
+            if parsed_end is None:
+                return error_response(
+                    '신체 기록 목록 조회에 실패했습니다.',
+                    {'end_date': ['날짜 형식은 YYYY-MM-DD이어야 합니다.']},
+                )
+            records = records.filter(record_date__lte=parsed_end)
+
+        serializer = BodyRecordSerializer(records.order_by('-record_date', '-id'), many=True)
+        return success_response('신체 기록 목록 조회 성공', serializer.data)
+
+    def post(self, request):
+        serializer = BodyRecordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response('신체 기록 등록에 실패했습니다.', serializer.errors)
+
+        record = serializer.save(user=request.user)
+        return success_response(
+            '신체 기록이 등록되었습니다.',
+            BodyRecordSerializer(record).data,
+            status.HTTP_201_CREATED,
+        )
+
+
+class BodyRecordDetailView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_record(self, request, body_record_id, message):
+        try:
+            return BodyRecord.objects.select_related('user__profile').get(
+                pk=body_record_id,
+                user=request.user,
+            )
+        except BodyRecord.DoesNotExist:
+            return error_response(
+                message,
+                {'body_record_id': ['수정 또는 삭제 가능한 내 신체 기록이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    def patch(self, request, body_record_id):
+        record = self.get_record(request, body_record_id, '신체 기록 수정에 실패했습니다.')
+        if not isinstance(record, BodyRecord):
+            return record
+
+        serializer = BodyRecordSerializer(record, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return error_response('신체 기록 수정에 실패했습니다.', serializer.errors)
+
+        serializer.save()
+        return success_response('신체 기록이 수정되었습니다.', serializer.data)
+
+    def delete(self, request, body_record_id):
+        record = self.get_record(request, body_record_id, '신체 기록 삭제에 실패했습니다.')
+        if not isinstance(record, BodyRecord):
+            return record
+
+        record.delete()
+        return success_response('신체 기록이 삭제되었습니다.', None)
+
+
+class ProgressView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        start_text = request.query_params.get('start_date')
+        end_text = request.query_params.get('end_date')
+        start_date = parse_date(start_text) if start_text else None
+        end_date = parse_date(end_text) if end_text else None
+
+        errors = {}
+        if start_date is None:
+            errors['start_date'] = ['YYYY-MM-DD 형식의 시작일이 필요합니다.']
+        if end_date is None:
+            errors['end_date'] = ['YYYY-MM-DD 형식의 종료일이 필요합니다.']
+        if not errors and start_date > end_date:
+            errors['date_range'] = ['시작일은 종료일보다 늦을 수 없습니다.']
+        if errors:
+            return error_response('진행 현황 조회에 실패했습니다.', errors)
+
+        from diets.models import Meal
+        from workouts.models import WorkoutLog
+
+        body_records = BodyRecord.objects.filter(
+            user=request.user,
+            record_date__range=(start_date, end_date),
+        ).select_related('user__profile').order_by('record_date', 'id')
+        meals = Meal.objects.filter(
+            user=request.user,
+            intake_date__range=(start_date, end_date),
+        )
+        workout_logs = WorkoutLog.objects.filter(
+            user=request.user,
+            workout_date__range=(start_date, end_date),
+        )
+
+        profile = getattr(request.user, 'profile', None)
+        data = {
+            'start_date': start_date,
+            'end_date': end_date,
+            'profile': ProfileSerializer(profile).data if profile else None,
+            'body_summary': self.body_summary(body_records),
+            'meal_summary': self.meal_summary(meals),
+            'workout_summary': self.workout_summary(workout_logs),
+        }
+        return success_response('진행 현황 조회 성공', data)
+
+    def body_summary(self, records):
+        records = list(records)
+        weighted_records = [record for record in records if record.weight is not None]
+        starting_weight = weighted_records[0].weight if weighted_records else None
+        latest_weight = weighted_records[-1].weight if weighted_records else None
+        weight_change = None
+        if starting_weight is not None and latest_weight is not None:
+            weight_change = round(latest_weight - starting_weight, 2)
+
+        recent = list(reversed(records[-10:]))
+        return {
+            'starting_weight': starting_weight,
+            'latest_weight': latest_weight,
+            'weight_change': weight_change,
+            'recent_records': BodyRecordSerializer(recent, many=True).data,
+        }
+
+    def meal_summary(self, meals):
+        daily = defaultdict(lambda: {
+            'meal_count': 0,
+            'total_calories': 0,
+            'total_carbohydrate': 0,
+            'total_protein': 0,
+            'total_fat': 0,
+        })
+        totals = {
+            'meal_count': 0,
+            'total_calories': 0,
+            'total_carbohydrate': 0,
+            'total_protein': 0,
+            'total_fat': 0,
+        }
+
+        for meal in meals:
+            values = daily[meal.intake_date.isoformat()]
+            values['meal_count'] += 1
+            totals['meal_count'] += 1
+            for field in ['total_calories', 'total_carbohydrate', 'total_protein', 'total_fat']:
+                value = getattr(meal, field)
+                values[field] += value
+                totals[field] += value
+
+        for values in [totals, *daily.values()]:
+            for field in ['total_calories', 'total_carbohydrate', 'total_protein', 'total_fat']:
+                values[field] = round(values[field], 2)
+
+        return {
+            **totals,
+            'meal_score': None,
+            'daily': [{'date': date, **daily[date]} for date in sorted(daily)],
+        }
+
+    def workout_summary(self, logs):
+        daily = defaultdict(lambda: {'workout_count': 0, 'total_workout_time': 0})
+        workout_count = 0
+        total_workout_time = 0
+
+        for log in logs:
+            values = daily[log.workout_date.isoformat()]
+            values['workout_count'] += 1
+            values['total_workout_time'] += log.workout_time
+            workout_count += 1
+            total_workout_time += log.workout_time
+
+        return {
+            'workout_count': workout_count,
+            'total_workout_time': total_workout_time,
+            'daily': [{'date': date, **daily[date]} for date in sorted(daily)],
+        }

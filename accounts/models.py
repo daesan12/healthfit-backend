@@ -22,3 +22,19 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} profile'
+
+
+class BodyRecord(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='body_records',
+    )
+    record_date = models.DateField()
+    weight = models.FloatField(null=True, blank=True)
+    body_fat_percentage = models.FloatField(null=True, blank=True)
+    skeletal_muscle_mass = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} {self.record_date}'

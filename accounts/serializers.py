@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
-from .models import Profile
+from .models import BodyRecord, Profile
 
 
 class SignupSerializer(serializers.Serializer):
@@ -89,3 +89,35 @@ class ProfileSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError('몸무게는 0보다 커야 합니다.')
         return value
+
+
+class BodyRecordSerializer(serializers.ModelSerializer):
+    bmi = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BodyRecord
+        fields = [
+            'id',
+            'record_date',
+            'weight',
+            'body_fat_percentage',
+            'skeletal_muscle_mass',
+            'bmi',
+            'created_at',
+        ]
+        read_only_fields = ['bmi', 'created_at']
+
+    def validate(self, attrs):
+        for field in ['weight', 'body_fat_percentage', 'skeletal_muscle_mass']:
+            value = attrs.get(field)
+            if value is not None and value < 0:
+                raise serializers.ValidationError({field: ['0 이상이어야 합니다.']})
+        return attrs
+
+    def get_bmi(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        if obj.weight is None or profile is None or not profile.height:
+            return None
+
+        height_m = profile.height / 100
+        return round(obj.weight / (height_m ** 2), 2)
