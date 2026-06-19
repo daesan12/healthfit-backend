@@ -1,9 +1,11 @@
 from django.db.models import Q
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from accounts.views import CommonResponseAPIView, error_response, success_response
+from accounts.views import CommonResponseAPIView, calculate_recommended_calories, error_response, success_response
 
 from .models import Food, Meal
 from .serializers import FoodSerializer, MealSerializer
@@ -137,6 +139,105 @@ class MealListCreateView(CommonResponseAPIView):
             return error_response('식단 기록 등록에 실패했습니다.', exc.detail)
 
         return success_response('식단 기록이 등록되었습니다.', MealSerializer(meal).data, status.HTTP_201_CREATED)
+
+
+class MealDashboardView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        target_date = self.get_target_date(request)
+        if target_date is None:
+            return error_response(
+                '식단 대시보드 조회에 실패했습니다.',
+                {'date': ['날짜 형식은 YYYY-MM-DD이어야 합니다.']},
+            )
+
+        meals = Meal.objects.filter(user=request.user, intake_date=target_date)
+        totals = self.get_totals(meals)
+        calorie_target = self.get_calorie_target(request.user, totals['total_calories'])
+
+        data = {
+            'date': target_date,
+            **totals,
+            **calorie_target,
+            'meal_type_summary': self.get_meal_type_summary(meals),
+        }
+        return success_response('식단 대시보드 조회 성공', data)
+
+    def get_target_date(self, request):
+        date_text = request.query_params.get('date')
+        if not date_text:
+            return timezone.localdate()
+        return parse_date(date_text)
+
+    def get_totals(self, meals):
+        return {
+            'total_calories': round(sum(meal.total_calories for meal in meals), 2),
+            'total_carbohydrate': round(sum(meal.total_carbohydrate for meal in meals), 2),
+            'total_protein': round(sum(meal.total_protein for meal in meals), 2),
+            'total_fat': round(sum(meal.total_fat for meal in meals), 2),
+        }
+
+    def get_calorie_target(self, user, total_calories):
+        if not hasattr(user, 'profile'):
+            return {
+                'recommended_calories': None,
+                'carbohydrate_ratio': None,
+                'protein_ratio': None,
+                'fat_ratio': None,
+                'recommended_carbohydrate': None,
+                'recommended_protein': None,
+                'recommended_fat': None,
+                'remaining_calories': None,
+            }
+
+        recommended_calories = calculate_recommended_calories(user.profile)
+        carbohydrate_ratio = 50
+        protein_ratio = 30
+        fat_ratio = 20
+
+        return {
+            'recommended_calories': recommended_calories,
+            'carbohydrate_ratio': carbohydrate_ratio,
+            'protein_ratio': protein_ratio,
+            'fat_ratio': fat_ratio,
+            'recommended_carbohydrate': round(recommended_calories * carbohydrate_ratio / 100 / 4, 1),
+            'recommended_protein': round(recommended_calories * protein_ratio / 100 / 4, 1),
+            'recommended_fat': round(recommended_calories * fat_ratio / 100 / 9, 1),
+            'remaining_calories': round(recommended_calories - total_calories, 2),
+        }
+
+    def get_meal_type_summary(self, meals):
+        summary = {
+            'breakfast': self.empty_meal_type_summary(),
+            'lunch': self.empty_meal_type_summary(),
+            'dinner': self.empty_meal_type_summary(),
+            'snack': self.empty_meal_type_summary(),
+        }
+
+        for meal in meals:
+            if meal.meal_type not in summary:
+                summary[meal.meal_type] = self.empty_meal_type_summary()
+            summary[meal.meal_type]['total_calories'] += meal.total_calories
+            summary[meal.meal_type]['total_carbohydrate'] += meal.total_carbohydrate
+            summary[meal.meal_type]['total_protein'] += meal.total_protein
+            summary[meal.meal_type]['total_fat'] += meal.total_fat
+            summary[meal.meal_type]['meal_count'] += 1
+
+        for values in summary.values():
+            for key in ['total_calories', 'total_carbohydrate', 'total_protein', 'total_fat']:
+                values[key] = round(values[key], 2)
+
+        return summary
+
+    def empty_meal_type_summary(self):
+        return {
+            'total_calories': 0,
+            'total_carbohydrate': 0,
+            'total_protein': 0,
+            'total_fat': 0,
+            'meal_count': 0,
+        }
 
 
 class MealDetailView(CommonResponseAPIView):
