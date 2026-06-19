@@ -1,0 +1,246 @@
+Table users {
+  id integer [primary key] // 사용자 고유 ID
+  username varchar [not null, unique] // 사용자 아이디 또는 닉네임, 중복 불가
+  email varchar [not null, unique] // 사용자 이메일, 중복 불가
+  password varchar [not null] // 로그인 비밀번호
+  created_at timestamp // 계정 생성일
+  updated_at timestamp // 계정 정보 수정일
+}
+
+Table profiles {
+  id integer [primary key] // 프로필 고유 ID
+  user_id integer [not null, unique] // 사용자 ID, users 테이블 참조, 사용자당 프로필 1개
+  gender varchar // 성별
+  age integer // 나이
+  height float // 키
+  weight float // 몸무게
+  body_type varchar // 체형 정보
+  activity_level varchar // 활동량
+  workout_goal varchar // 운동 또는 식단 목표
+  workout_experience varchar // 운동 경험 수준
+  created_at timestamp // 프로필 생성일
+  updated_at timestamp // 프로필 수정일
+}
+
+Table body_records {
+  id integer [primary key] // 신체 기록 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  record_date date [not null] // 신체 정보를 기록한 날짜
+  weight float // 해당 날짜의 몸무게
+  body_fat_percentage float // 체지방률
+  skeletal_muscle_mass float // 골격근량
+  created_at timestamp // 기록 생성일
+}
+
+Table foods {
+  id integer [primary key] // 음식 고유 ID
+  name varchar [not null] // 음식 이름
+  category varchar [not null] // 음식 카테고리
+  calories integer [not null] // 음식 칼로리
+  carbohydrate float // 탄수화물 함량
+  protein float // 단백질 함량
+  fat float // 지방 함량
+  user_id integer // 사용자가 추가한 음식이면 users.id, 기본 DB 음식이면 null
+  created_at timestamp // 음식 데이터 생성일
+  updated_at timestamp // 음식 데이터 수정일
+}
+
+Table meals {
+  id integer [primary key] // 식사 기록 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  meal_type varchar [not null] // 식사 유형, 예: 아침, 점심, 저녁, 간식
+  intake_date date [not null] // 음식을 섭취한 날짜
+  total_calories integer // 해당 식사의 총 칼로리
+  total_carbohydrate float // 해당 식사의 총 탄수화물
+  total_protein float // 해당 식사의 총 단백질
+  total_fat float // 해당 식사의 총 지방
+  created_at timestamp // 식사 기록 생성일
+  updated_at timestamp // 식사 기록 수정일
+}
+
+Table meal_items {
+  id integer [primary key] // 식사 상세 항목 고유 ID
+  meal_id integer [not null] // 식사 기록 ID, meals 테이블 참조
+  food_id integer [not null] // 음식 ID, foods 테이블 참조
+  amount float // 섭취량
+  calories integer // 섭취량 기준 칼로리
+  carbohydrate float // 섭취량 기준 탄수화물
+  protein float // 섭취량 기준 단백질
+  fat float // 섭취량 기준 지방
+}
+
+Table saved_meals {
+  id integer [primary key] // 저장 식단 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  title varchar [not null] // 저장 식단 제목
+  description text // 저장 식단 설명
+  total_calories integer // 저장 식단 총 칼로리
+  total_carbohydrate float // 저장 식단 총 탄수화물
+  total_protein float // 저장 식단 총 단백질
+  total_fat float // 저장 식단 총 지방
+  created_at timestamp // 저장 식단 생성일
+  updated_at timestamp // 저장 식단 수정일
+}
+
+Table saved_meal_items {
+  id integer [primary key] // 저장 식단 상세 항목 고유 ID
+  saved_meal_id integer [not null] // 저장 식단 ID, saved_meals 테이블 참조
+  food_id integer [not null] // 음식 ID, foods 테이블 참조
+  amount float // 음식 섭취량 또는 구성량
+}
+
+Table diet_feedbacks {
+  id integer [primary key] // 식단 피드백 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  meal_id integer // 평가 대상 식사 ID, meals 테이블 참조
+  score integer // 식단 평가 점수
+  total_calories integer // 평가 기준 총 섭취 칼로리
+  total_carbohydrate float // 평가 기준 총 탄수화물
+  total_protein float // 평가 기준 총 단백질
+  total_fat float // 평가 기준 총 지방
+  feedback text // AI 식단 피드백 내용
+  created_at timestamp // 피드백 생성일
+}
+
+Table workouts {
+  id integer [primary key] // 운동 고유 ID
+  exercise_id varchar [not null] // 외부 운동 API 또는 운동 데이터 식별 ID
+  name varchar [not null] // 운동 이름
+  gif_url url // 운동 동작 GIF 이미지 URL
+
+  body_parts json // 운동 부위
+  equipments json // 필요한 운동 장비
+  target_muscles json // 주요 자극 근육
+  secondary_muscles json // 보조 자극 근육
+  instructions json // 운동 수행 방법 설명
+
+  user_id integer // 사용자가 직접 추가한 운동이면 users.id, 기본 운동이면 null
+  created_at timestamp // 운동 데이터 생성일
+  updated_at timestamp // 운동 데이터 수정일
+}
+
+Table workout_routines {
+  id integer [primary key] // 운동 루틴 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  title varchar [not null] // 운동 루틴 제목
+  description text // 운동 루틴 설명
+  goal varchar // 루틴 목표, 예: 감량, 근력 향상, 유지
+  created_at timestamp // 루틴 생성일
+  updated_at timestamp // 루틴 수정일
+}
+
+Table routine_items {
+  id integer [primary key] // 루틴 상세 항목 고유 ID
+  routine_id integer [not null] // 운동 루틴 ID, workout_routines 테이블 참조
+  workout_id integer [not null] // 운동 ID, workouts 테이블 참조
+  set_count integer // 세트 수
+  repetition integer // 반복 횟수
+  workout_time integer // 운동 시간
+  workout_order integer // 루틴 내 운동 순서
+}
+
+Table workout_logs {
+  id integer [primary key] // 운동 기록 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  workout_id integer [not null] // 수행한 운동 ID, workouts 테이블 참조
+  routine_id integer // 사용한 운동 루틴 ID, 루틴 없이 단일 운동 기록 시 null 가능
+  workout_date date [not null] // 운동 수행 날짜
+  workout_time integer // 실제 운동 시간
+  set_count integer // 실제 수행 세트 수
+  repetition integer // 실제 반복 횟수
+  memo text // 운동 기록 메모
+  created_at timestamp // 운동 기록 생성일
+}
+
+Table ai_recommendations {
+  id integer [primary key] // AI 추천 결과 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  recommendation_type varchar [not null] // 추천 유형, 예: 식단 추천, 운동 추천
+  title varchar // 추천 결과 제목
+  content json // 추천 결과 내용
+  reason text // 추천 이유
+  created_at timestamp // 추천 결과 생성일
+}
+
+Table ai_chats {
+  id integer [primary key] // AI 질문 응답 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  question text [not null] // 사용자가 입력한 질문
+  answer text // AI 답변 내용
+  created_at timestamp // 질문 응답 생성일
+}
+
+Table progress_records {
+  id integer [primary key] // 진행 현황 기록 고유 ID
+  user_id integer [not null] // 사용자 ID, users 테이블 참조
+  record_date date [not null] // 진행 현황 기록 날짜
+  weight float // 해당 날짜의 몸무게
+  total_burned_calories integer // 해당 날짜 총 소모 칼로리
+  meal_score integer // 해당 날짜 식단 평가 점수
+  workout_count integer // 해당 날짜 운동 횟수
+  created_at timestamp // 진행 현황 기록 생성일
+}
+
+Table posts {
+  id integer [primary key] // 게시글 고유 ID
+  user_id integer [not null] // 작성자 ID, users 테이블 참조
+  title varchar [not null] // 게시글 제목
+  content text [not null] // 게시글 내용
+  category varchar // 게시글 카테고리, 예: 식단, 운동, 자유
+  created_at timestamp // 게시글 작성일
+  updated_at timestamp // 게시글 수정일
+}
+
+Table comments {
+  id integer [primary key] // 댓글 고유 ID
+  user_id integer [not null] // 댓글 작성자 ID, users 테이블 참조
+  post_id integer [not null] // 댓글이 달린 게시글 ID, posts 테이블 참조
+  content text [not null] // 댓글 내용
+  created_at timestamp // 댓글 작성일
+  updated_at timestamp // 댓글 수정일
+}
+
+Table likes {
+  id integer [primary key] // 좋아요 고유 ID
+  user_id integer [not null] // 좋아요를 누른 사용자 ID, users 테이블 참조
+  post_id integer [not null] // 좋아요가 눌린 게시글 ID, posts 테이블 참조
+  created_at timestamp // 좋아요 생성일
+}
+
+/* 회원 / 프로필 */
+Ref: profiles.user_id > users.id // 사용자 1명은 프로필 1개를 가짐
+Ref: body_records.user_id > users.id // 사용자 1명은 여러 신체 기록을 가질 수 있음
+
+/* 음식 / 식단 */
+Ref: foods.user_id > users.id // 사용자가 직접 추가한 음식과 사용자 연결
+Ref: meals.user_id > users.id // 사용자 1명은 여러 식사 기록을 가질 수 있음
+Ref: meal_items.meal_id > meals.id // 식사 1개는 여러 음식 항목을 가질 수 있음
+Ref: meal_items.food_id > foods.id // 음식 1개는 여러 식사 항목에 사용될 수 있음
+Ref: saved_meals.user_id > users.id // 사용자 1명은 여러 저장 식단을 가질 수 있음
+Ref: saved_meal_items.saved_meal_id > saved_meals.id // 저장 식단 1개는 여러 음식 항목을 가질 수 있음
+Ref: saved_meal_items.food_id > foods.id // 음식 1개는 여러 저장 식단에 포함될 수 있음
+Ref: diet_feedbacks.user_id > users.id // 사용자별 식단 피드백 저장
+Ref: diet_feedbacks.meal_id > meals.id // 특정 식사 기록에 대한 AI 피드백 연결
+
+/* 운동 / 루틴 */
+Ref: workouts.user_id > users.id // 사용자가 직접 추가한 운동과 사용자 연결
+Ref: workout_routines.user_id > users.id // 사용자 1명은 여러 운동 루틴을 가질 수 있음
+Ref: routine_items.routine_id > workout_routines.id // 운동 루틴 1개는 여러 운동 항목을 가질 수 있음
+Ref: routine_items.workout_id > workouts.id // 운동 1개는 여러 루틴 항목에 포함될 수 있음
+Ref: workout_logs.user_id > users.id // 사용자 1명은 여러 운동 기록을 가질 수 있음
+Ref: workout_logs.workout_id > workouts.id // 운동 기록은 특정 운동과 연결됨
+Ref: workout_logs.routine_id > workout_routines.id // 운동 기록은 특정 루틴과 연결될 수 있음
+
+/* AI */
+Ref: ai_recommendations.user_id > users.id // 사용자별 AI 추천 결과 저장
+Ref: ai_chats.user_id > users.id // 사용자별 AI 질문 응답 기록 저장
+
+/* 진행 현황 */
+Ref: progress_records.user_id > users.id // 사용자별 진행 현황 기록 저장
+
+/* 커뮤니티 */
+Ref: posts.user_id > users.id // 사용자 1명은 여러 게시글을 작성할 수 있음
+Ref: comments.user_id > users.id // 사용자 1명은 여러 댓글을 작성할 수 있음
+Ref: comments.post_id > posts.id // 게시글 1개는 여러 댓글을 가질 수 있음
+Ref: likes.user_id > users.id // 사용자 1명은 여러 좋아요를 누를 수 있음
+Ref: likes.post_id > posts.id // 게시글 1개는 여러 좋아요를 받을 수 있음
