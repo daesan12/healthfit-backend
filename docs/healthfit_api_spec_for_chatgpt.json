@@ -216,6 +216,26 @@
       "detail": "# 음식 상세 조회\n\n## Response Body\n```json\n{\"success\":true,\"message\":\"음식 상세 조회 성공\",\"data\":{\"id\":1,\"name\":\"시래기 된장국\",\"category\":\"국 및 탕류\",\"calories\":11.0,\"carbohydrate\":1.6,\"protein\":0.7,\"fat\":0.26,\"user_id\":null}}\n```"
     },
     {
+      "no": 62,
+      "category": "음식",
+      "method": "PATCH",
+      "url": "/api/v1/foods/{food_id}/",
+      "auth": "필요",
+      "feature": "사용자 음식 수정",
+      "desc": "로그인한 사용자가 직접 추가한 음식만 수정한다. 기본 음식 DB(user_id=null)는 일반 사용자가 수정할 수 없다.",
+      "detail": "# 사용자 음식 수정\n\n## Request Body\n```json\n{\"name\":\"간장계란밥 수정\",\"calories\":500.0,\"carbohydrate\":68.0,\"protein\":23.0,\"fat\":14.0}\n```\n\n## Response Body\n```json\n{\"success\":true,\"message\":\"음식이 수정되었습니다.\",\"data\":{\"id\":10,\"name\":\"간장계란밥 수정\",\"category\":\"사용자 음식\",\"calories\":500.0,\"carbohydrate\":68.0,\"protein\":23.0,\"fat\":14.0,\"user_id\":1}}\n```"
+    },
+    {
+      "no": 63,
+      "category": "음식",
+      "method": "DELETE",
+      "url": "/api/v1/foods/{food_id}/",
+      "auth": "필요",
+      "feature": "사용자 음식 삭제",
+      "desc": "로그인한 사용자가 직접 추가한 음식만 삭제한다. 기본 음식 DB(user_id=null)는 일반 사용자가 삭제할 수 없다.",
+      "detail": "# 사용자 음식 삭제\n\n## Response Body\n```json\n{\"success\":true,\"message\":\"음식이 삭제되었습니다.\",\"data\":null}\n```"
+    },
+    {
       "no": 15,
       "category": "식단",
       "method": "GET",

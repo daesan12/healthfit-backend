@@ -14,6 +14,8 @@
 | 음식 | GET | /api/v1/foods/ | 선택 | 음식 목록/검색 | 12_음식_목록검색 |
 | 음식 | POST | /api/v1/foods/ | 필요 | 음식 추가 | 13_음식_추가 |
 | 음식 | GET | /api/v1/foods/{food_id}/ | 선택 | 음식 상세 조회 | 14_음식_상세_조회 |
+| 음식 | PATCH | /api/v1/foods/{food_id}/ | 필요 | 사용자 음식 수정 | 14_음식_수정 |
+| 음식 | DELETE | /api/v1/foods/{food_id}/ | 필요 | 사용자 음식 삭제 | 14_음식_삭제 |
 | 식단 | GET | /api/v1/meals/ | 필요 | 식단 기록 목록 | 15_식단_기록_목록 |
 | 식단 | POST | /api/v1/meals/ | 필요 | 식단 기록 등록 | 16_식단_기록_등록 |
 | 식단 | GET | /api/v1/meals/{meal_id}/ | 필요 | 식단 기록 상세 | 17_식단_기록_상세 |
