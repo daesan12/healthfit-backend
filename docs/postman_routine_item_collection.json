@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "Routine Item APIs",
+    "description": "Workout Routine Item 생성, 수정, 삭제 API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "루틴 항목 추가",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"exercise_id\": {{exercise_id}},\n  \"order\": 1,\n  \"sets\": 3,\n  \"reps\": 12,\n  \"weight\": 20,\n  \"rest_seconds\": 60\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/v1/workout-routines/{{routine_id}}/items/"
+      }
+    },
+    {
+      "name": "루틴 항목 수정",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"order\": 1,\n  \"sets\": 5,\n  \"reps\": 10,\n  \"weight\": 30,\n  \"rest_seconds\": 90\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/v1/routine-items/{{routine_item_id}}/"
+      }
+    },
+    {
+      "name": "루틴 항목 삭제",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/api/v1/routine-items/{{routine_item_id}}/"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "routine_id",
+      "value": "1"
+    },
+    {
+      "key": "routine_item_id",
+      "value": "1"
+    },
+    {
+      "key": "exercise_id",
+      "value": "1"
+    }
+  ]
+}
