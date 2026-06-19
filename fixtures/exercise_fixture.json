@@ -1,6 +1,6 @@
 [
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 1,
     "fields": {
       "exercise_id": "01qpYSe",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 2,
     "fields": {
       "exercise_id": "05Cf2v8",
@@ -59,7 +59,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 3,
     "fields": {
       "exercise_id": "0br45wL",
@@ -90,7 +90,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 4,
     "fields": {
       "exercise_id": "0IgNjSM",
@@ -118,7 +118,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 5,
     "fields": {
       "exercise_id": "0jp9Rlz",
@@ -147,7 +147,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 6,
     "fields": {
       "exercise_id": "0JtKWum",
@@ -183,7 +183,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 7,
     "fields": {
       "exercise_id": "0mB6wHO",
@@ -212,7 +212,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 8,
     "fields": {
       "exercise_id": "0MlxeMn",
@@ -242,7 +242,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 9,
     "fields": {
       "exercise_id": "0rHfvy9",
@@ -272,7 +272,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 10,
     "fields": {
       "exercise_id": "0S75mYG",
@@ -300,7 +300,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 11,
     "fields": {
       "exercise_id": "0V2YQjW",
@@ -330,7 +330,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 12,
     "fields": {
       "exercise_id": "0xDpB4L",
@@ -360,7 +360,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 13,
     "fields": {
       "exercise_id": "0Yz8WdV",
@@ -391,7 +391,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 14,
     "fields": {
       "exercise_id": "11wrviz",
@@ -423,7 +423,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 15,
     "fields": {
       "exercise_id": "13TpY4H",
@@ -453,7 +453,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 16,
     "fields": {
       "exercise_id": "17bqEXD",
@@ -481,7 +481,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 17,
     "fields": {
       "exercise_id": "17lJ1kr",
@@ -511,7 +511,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 18,
     "fields": {
       "exercise_id": "196HJGw",
@@ -540,7 +540,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 19,
     "fields": {
       "exercise_id": "1bQkKZK",
@@ -570,7 +570,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 20,
     "fields": {
       "exercise_id": "1cTf2Ux",
@@ -598,7 +598,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 21,
     "fields": {
       "exercise_id": "1DN3iz4",
@@ -628,7 +628,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 22,
     "fields": {
       "exercise_id": "1g5bPpA",
@@ -656,7 +656,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 23,
     "fields": {
       "exercise_id": "1gFNTZV",
@@ -686,7 +686,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 24,
     "fields": {
       "exercise_id": "1GPHRyK",
@@ -715,7 +715,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 25,
     "fields": {
       "exercise_id": "1IG6gVF",
@@ -746,7 +746,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 26,
     "fields": {
       "exercise_id": "1jXLYEw",
@@ -776,7 +776,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 27,
     "fields": {
       "exercise_id": "1kB3Wmk",
@@ -804,7 +804,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 28,
     "fields": {
       "exercise_id": "1oE78pm",
@@ -833,7 +833,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 29,
     "fields": {
       "exercise_id": "1PK5Uo3",
@@ -864,7 +864,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 30,
     "fields": {
       "exercise_id": "1PLE8e9",
@@ -894,7 +894,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 31,
     "fields": {
       "exercise_id": "1qrWgZ2",
@@ -923,7 +923,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 32,
     "fields": {
       "exercise_id": "1TkiAFK",
@@ -951,7 +951,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 33,
     "fields": {
       "exercise_id": "1TVoin7",
@@ -979,7 +979,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 34,
     "fields": {
       "exercise_id": "1u36hhy",
@@ -1011,7 +1011,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 35,
     "fields": {
       "exercise_id": "1V1gj1u",
@@ -1039,7 +1039,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 36,
     "fields": {
       "exercise_id": "1VpF8db",
@@ -1070,7 +1070,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 37,
     "fields": {
       "exercise_id": "1xHyxys",
@@ -1099,7 +1099,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 38,
     "fields": {
       "exercise_id": "1YB40kg",
@@ -1128,7 +1128,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 39,
     "fields": {
       "exercise_id": "1YUWDNZ",
@@ -1159,7 +1159,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 40,
     "fields": {
       "exercise_id": "1ZFqTDN",
@@ -1187,7 +1187,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 41,
     "fields": {
       "exercise_id": "225x2Vd",
@@ -1216,7 +1216,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 42,
     "fields": {
       "exercise_id": "25GPyDY",
@@ -1245,7 +1245,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 43,
     "fields": {
       "exercise_id": "27NNGFr",
@@ -1278,7 +1278,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 44,
     "fields": {
       "exercise_id": "2dImyQ8",
@@ -1307,7 +1307,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 45,
     "fields": {
       "exercise_id": "2Dk4xQV",
@@ -1338,7 +1338,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 46,
     "fields": {
       "exercise_id": "2DxtqHL",
@@ -1369,7 +1369,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 47,
     "fields": {
       "exercise_id": "2gPfomN",
@@ -1398,7 +1398,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 48,
     "fields": {
       "exercise_id": "2IHEa2T",
@@ -1427,7 +1427,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 49,
     "fields": {
       "exercise_id": "2IxROQ1",
@@ -1457,7 +1457,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 50,
     "fields": {
       "exercise_id": "2JCuFTU",
@@ -1487,7 +1487,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 51,
     "fields": {
       "exercise_id": "2jl9K55",
@@ -1518,7 +1518,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 52,
     "fields": {
       "exercise_id": "2kattbR",
@@ -1547,7 +1547,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 53,
     "fields": {
       "exercise_id": "2KGnL6M",
@@ -1576,7 +1576,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 54,
     "fields": {
       "exercise_id": "2LQkNPW",
@@ -1605,7 +1605,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 55,
     "fields": {
       "exercise_id": "2NImIAG",
@@ -1635,7 +1635,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 56,
     "fields": {
       "exercise_id": "2NpxjC1",
@@ -1666,7 +1666,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 57,
     "fields": {
       "exercise_id": "2Pya1cP",
@@ -1698,7 +1698,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 58,
     "fields": {
       "exercise_id": "2qTvJAZ",
@@ -1727,7 +1727,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 59,
     "fields": {
       "exercise_id": "2sQGZ5b",
@@ -1757,7 +1757,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 60,
     "fields": {
       "exercise_id": "2zNKRUB",
@@ -1785,7 +1785,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 61,
     "fields": {
       "exercise_id": "33AzZeV",
@@ -1815,7 +1815,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 62,
     "fields": {
       "exercise_id": "3d7wHyd",
@@ -1844,7 +1844,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 63,
     "fields": {
       "exercise_id": "3eGE2JC",
@@ -1872,7 +1872,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 64,
     "fields": {
       "exercise_id": "3nvEbbF",
@@ -1904,7 +1904,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 65,
     "fields": {
       "exercise_id": "3omWx6P",
@@ -1931,7 +1931,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 66,
     "fields": {
       "exercise_id": "3pqGMQj",
@@ -1959,7 +1959,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 67,
     "fields": {
       "exercise_id": "3QgteDK",
@@ -1989,7 +1989,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 68,
     "fields": {
       "exercise_id": "3s4NnTh",
@@ -2018,7 +2018,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 69,
     "fields": {
       "exercise_id": "3T12T87",
@@ -2047,7 +2047,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 70,
     "fields": {
       "exercise_id": "3tAXPQ6",
@@ -2076,7 +2076,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 71,
     "fields": {
       "exercise_id": "3TZduzM",
@@ -2106,7 +2106,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 72,
     "fields": {
       "exercise_id": "3uj0Ozg",
@@ -2136,7 +2136,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 73,
     "fields": {
       "exercise_id": "3XFdb1Z",
@@ -2167,7 +2167,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 74,
     "fields": {
       "exercise_id": "3xK09Sk",
@@ -2196,7 +2196,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 75,
     "fields": {
       "exercise_id": "3ZflifB",
@@ -2226,7 +2226,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 76,
     "fields": {
       "exercise_id": "4c9BhzB",
@@ -2256,7 +2256,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 77,
     "fields": {
       "exercise_id": "4CBIBOM",
@@ -2284,7 +2284,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 78,
     "fields": {
       "exercise_id": "4cWjYEN",
@@ -2313,7 +2313,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 79,
     "fields": {
       "exercise_id": "4dF3maG",
@@ -2342,7 +2342,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 80,
     "fields": {
       "exercise_id": "4dUn2iv",
@@ -2371,7 +2371,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 81,
     "fields": {
       "exercise_id": "4f8RXP8",
@@ -2401,7 +2401,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 82,
     "fields": {
       "exercise_id": "4GqRrAk",
@@ -2431,7 +2431,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 83,
     "fields": {
       "exercise_id": "4hATdoB",
@@ -2462,7 +2462,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 84,
     "fields": {
       "exercise_id": "4ievMJ9",
@@ -2491,7 +2491,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 85,
     "fields": {
       "exercise_id": "4IKbhHV",
@@ -2520,7 +2520,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 86,
     "fields": {
       "exercise_id": "4Jc36XM",
@@ -2549,7 +2549,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 87,
     "fields": {
       "exercise_id": "4Jt8QsQ",
@@ -2578,7 +2578,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 88,
     "fields": {
       "exercise_id": "4KJEpzb",
@@ -2610,7 +2610,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 89,
     "fields": {
       "exercise_id": "4Leypho",
@@ -2639,7 +2639,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 90,
     "fields": {
       "exercise_id": "4LIG9xr",
@@ -2668,7 +2668,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 91,
     "fields": {
       "exercise_id": "4LoWllp",
@@ -2700,7 +2700,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 92,
     "fields": {
       "exercise_id": "4Ml7QFO",
@@ -2728,7 +2728,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 93,
     "fields": {
       "exercise_id": "4OaumBr",
@@ -2759,7 +2759,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 94,
     "fields": {
       "exercise_id": "4QqYaJW",
@@ -2790,7 +2790,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 95,
     "fields": {
       "exercise_id": "4U7iLb5",
@@ -2820,7 +2820,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 96,
     "fields": {
       "exercise_id": "4x5Okof",
@@ -2849,7 +2849,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 97,
     "fields": {
       "exercise_id": "50BETrz",
@@ -2877,7 +2877,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 98,
     "fields": {
       "exercise_id": "53Ttlck",
@@ -2906,7 +2906,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 99,
     "fields": {
       "exercise_id": "58rdhvL",
@@ -2933,7 +2933,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 100,
     "fields": {
       "exercise_id": "5bpPTHv",
@@ -2963,7 +2963,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 101,
     "fields": {
       "exercise_id": "5BZHW9s",
@@ -2993,7 +2993,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 102,
     "fields": {
       "exercise_id": "5eLRITT",
@@ -3021,7 +3021,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 103,
     "fields": {
       "exercise_id": "5fKX7wi",
@@ -3049,7 +3049,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 104,
     "fields": {
       "exercise_id": "5ipN0iE",
@@ -3080,7 +3080,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 105,
     "fields": {
       "exercise_id": "5KLbZWx",
@@ -3109,7 +3109,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 106,
     "fields": {
       "exercise_id": "5lE7XRz",
@@ -3140,7 +3140,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 107,
     "fields": {
       "exercise_id": "5MRH8H2",
@@ -3172,7 +3172,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 108,
     "fields": {
       "exercise_id": "5uFK1xr",
@@ -3200,7 +3200,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 109,
     "fields": {
       "exercise_id": "5v7KYld",
@@ -3230,7 +3230,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 110,
     "fields": {
       "exercise_id": "5VCj6iH",
@@ -3261,7 +3261,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 111,
     "fields": {
       "exercise_id": "5vfAI0I",
@@ -3290,7 +3290,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 112,
     "fields": {
       "exercise_id": "5VXmnV5",
@@ -3319,7 +3319,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 113,
     "fields": {
       "exercise_id": "61GrD55",
@@ -3350,7 +3350,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 114,
     "fields": {
       "exercise_id": "62Nw60O",
@@ -3380,7 +3380,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 115,
     "fields": {
       "exercise_id": "641mIfk",
@@ -3409,7 +3409,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 116,
     "fields": {
       "exercise_id": "67n3r98",
@@ -3438,7 +3438,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 117,
     "fields": {
       "exercise_id": "6cKQC5E",
@@ -3467,7 +3467,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 118,
     "fields": {
       "exercise_id": "6CKUx7o",
@@ -3495,7 +3495,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 119,
     "fields": {
       "exercise_id": "6e2DcYX",
@@ -3525,7 +3525,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 120,
     "fields": {
       "exercise_id": "6em2Dxj",
@@ -3555,7 +3555,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 121,
     "fields": {
       "exercise_id": "6FMU51h",
@@ -3585,7 +3585,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 122,
     "fields": {
       "exercise_id": "6HiHHe0",
@@ -3613,7 +3613,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 123,
     "fields": {
       "exercise_id": "6HmFgmx",
@@ -3642,7 +3642,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 124,
     "fields": {
       "exercise_id": "6kSxYnw",
@@ -3672,7 +3672,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 125,
     "fields": {
       "exercise_id": "6MaEjVA",
@@ -3702,7 +3702,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 126,
     "fields": {
       "exercise_id": "6MfS53i",
@@ -3729,7 +3729,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 127,
     "fields": {
       "exercise_id": "6pTkI99",
@@ -3762,7 +3762,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 128,
     "fields": {
       "exercise_id": "6sMAmNv",
@@ -3791,7 +3791,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 129,
     "fields": {
       "exercise_id": "6sYyrRX",
@@ -3821,7 +3821,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 130,
     "fields": {
       "exercise_id": "6t00BsF",
@@ -3850,7 +3850,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 131,
     "fields": {
       "exercise_id": "6TG6x2w",
@@ -3878,7 +3878,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 132,
     "fields": {
       "exercise_id": "6vcvsLS",
@@ -3906,7 +3906,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 133,
     "fields": {
       "exercise_id": "6Wr0F3W",
@@ -3936,7 +3936,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 134,
     "fields": {
       "exercise_id": "6YUfHPL",
@@ -3966,7 +3966,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 135,
     "fields": {
       "exercise_id": "6ZCiYWQ",
@@ -3994,7 +3994,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 136,
     "fields": {
       "exercise_id": "72BC5Za",
@@ -4024,7 +4024,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 137,
     "fields": {
       "exercise_id": "75Bgtjy",
@@ -4054,7 +4054,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 138,
     "fields": {
       "exercise_id": "76vfTdU",
@@ -4086,7 +4086,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 139,
     "fields": {
       "exercise_id": "78VqWQK",
@@ -4117,7 +4117,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 140,
     "fields": {
       "exercise_id": "7aolH9D",
@@ -4145,7 +4145,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 141,
     "fields": {
       "exercise_id": "7aVz15j",
@@ -4175,7 +4175,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 142,
     "fields": {
       "exercise_id": "7B4F5nZ",
@@ -4205,7 +4205,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 143,
     "fields": {
       "exercise_id": "7Ba7bQ2",
@@ -4234,7 +4234,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 144,
     "fields": {
       "exercise_id": "7D5bgLT",
@@ -4262,7 +4262,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 145,
     "fields": {
       "exercise_id": "7E06s6d",
@@ -4292,7 +4292,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 146,
     "fields": {
       "exercise_id": "7ePTw4B",
@@ -4320,7 +4320,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 147,
     "fields": {
       "exercise_id": "7F1DVzn",
@@ -4351,7 +4351,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 148,
     "fields": {
       "exercise_id": "7f2jsqP",
@@ -4380,7 +4380,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 149,
     "fields": {
       "exercise_id": "7gdLIXa",
@@ -4408,7 +4408,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 150,
     "fields": {
       "exercise_id": "7Hg55JG",
@@ -4440,7 +4440,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 151,
     "fields": {
       "exercise_id": "7i4msxz",
@@ -4469,7 +4469,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 152,
     "fields": {
       "exercise_id": "7I6LNUG",
@@ -4501,7 +4501,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 153,
     "fields": {
       "exercise_id": "7inpWch",
@@ -4531,7 +4531,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 154,
     "fields": {
       "exercise_id": "7jGOBF3",
@@ -4561,7 +4561,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 155,
     "fields": {
       "exercise_id": "7M66AVi",
@@ -4589,7 +4589,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 156,
     "fields": {
       "exercise_id": "7OeHptV",
@@ -4620,7 +4620,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 157,
     "fields": {
       "exercise_id": "7RWNjiB",
@@ -4650,7 +4650,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 158,
     "fields": {
       "exercise_id": "7saC5zz",
@@ -4680,7 +4680,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 159,
     "fields": {
       "exercise_id": "7vG5o25",
@@ -4710,7 +4710,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 160,
     "fields": {
       "exercise_id": "7w6i0vE",
@@ -4739,7 +4739,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 161,
     "fields": {
       "exercise_id": "7WaDzyL",
@@ -4768,7 +4768,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 162,
     "fields": {
       "exercise_id": "7xeukSt",
@@ -4797,7 +4797,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 163,
     "fields": {
       "exercise_id": "7xI5MXA",
@@ -4829,7 +4829,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 164,
     "fields": {
       "exercise_id": "7y9JIMj",
@@ -4859,7 +4859,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 165,
     "fields": {
       "exercise_id": "7zdxRTl",
@@ -4891,7 +4891,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 166,
     "fields": {
       "exercise_id": "82LxxkW",
@@ -4920,7 +4920,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 167,
     "fields": {
       "exercise_id": "83HoW9X",
@@ -4949,7 +4949,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 168,
     "fields": {
       "exercise_id": "84RyJf8",
@@ -4977,7 +4977,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 169,
     "fields": {
       "exercise_id": "84sESNy",
@@ -5009,7 +5009,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 170,
     "fields": {
       "exercise_id": "89HVjEp",
@@ -5038,7 +5038,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 171,
     "fields": {
       "exercise_id": "8ARQ9Hw",
@@ -5069,7 +5069,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 172,
     "fields": {
       "exercise_id": "8d8qJQI",
@@ -5101,7 +5101,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 173,
     "fields": {
       "exercise_id": "8DiFDVA",
@@ -5131,7 +5131,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 174,
     "fields": {
       "exercise_id": "8eqjhOl",
@@ -5162,7 +5162,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 175,
     "fields": {
       "exercise_id": "8fgqP5a",
@@ -5192,7 +5192,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 176,
     "fields": {
       "exercise_id": "8gQo5Ss",
@@ -5221,7 +5221,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 177,
     "fields": {
       "exercise_id": "8IbNZwc",
@@ -5251,7 +5251,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 178,
     "fields": {
       "exercise_id": "8K7m2SS",
@@ -5279,7 +5279,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 179,
     "fields": {
       "exercise_id": "8ozhUIZ",
@@ -5307,7 +5307,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 180,
     "fields": {
       "exercise_id": "8xUv4J7",
@@ -5335,7 +5335,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 181,
     "fields": {
       "exercise_id": "903mzG8",
@@ -5365,7 +5365,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 182,
     "fields": {
       "exercise_id": "945zpRg",
@@ -5395,7 +5395,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 183,
     "fields": {
       "exercise_id": "99rWm7w",
@@ -5423,7 +5423,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 184,
     "fields": {
       "exercise_id": "9Ap7miY",
@@ -5451,7 +5451,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 185,
     "fields": {
       "exercise_id": "9c6T1YX",
@@ -5485,7 +5485,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 186,
     "fields": {
       "exercise_id": "9E25EOx",
@@ -5516,7 +5516,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 187,
     "fields": {
       "exercise_id": "9fCHfSc",
@@ -5548,7 +5548,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 188,
     "fields": {
       "exercise_id": "9gbyYKk",
@@ -5578,7 +5578,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 189,
     "fields": {
       "exercise_id": "9GXrTE6",
@@ -5609,7 +5609,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 190,
     "fields": {
       "exercise_id": "9IxJdtC",
@@ -5637,7 +5637,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 191,
     "fields": {
       "exercise_id": "9JprnPh",
@@ -5666,7 +5666,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 192,
     "fields": {
       "exercise_id": "9KU9TYF",
@@ -5697,7 +5697,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 193,
     "fields": {
       "exercise_id": "9pa4H5m",
@@ -5730,7 +5730,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 194,
     "fields": {
       "exercise_id": "9pQSkH8",
@@ -5761,7 +5761,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 195,
     "fields": {
       "exercise_id": "9sgNE2O",
@@ -5791,7 +5791,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 196,
     "fields": {
       "exercise_id": "9Tkqa9O",
@@ -5821,7 +5821,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 197,
     "fields": {
       "exercise_id": "9WTm7dq",
@@ -5849,7 +5849,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 198,
     "fields": {
       "exercise_id": "9XjtHvS",
@@ -5878,7 +5878,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 199,
     "fields": {
       "exercise_id": "9Z23cLE",
@@ -5908,7 +5908,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 200,
     "fields": {
       "exercise_id": "9ZGZuOD",
@@ -5939,7 +5939,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 201,
     "fields": {
       "exercise_id": "A2upspL",
@@ -5969,7 +5969,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 202,
     "fields": {
       "exercise_id": "A3P4O0R",
@@ -5998,7 +5998,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 203,
     "fields": {
       "exercise_id": "A6wtbuL",
@@ -6026,7 +6026,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 204,
     "fields": {
       "exercise_id": "a8VDgLw",
@@ -6058,7 +6058,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 205,
     "fields": {
       "exercise_id": "A9qxk2F",
@@ -6089,7 +6089,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 206,
     "fields": {
       "exercise_id": "aaxA3cm",
@@ -6120,7 +6120,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 207,
     "fields": {
       "exercise_id": "aaXr7ld",
@@ -6151,7 +6151,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 208,
     "fields": {
       "exercise_id": "aDoFKrE",
@@ -6180,7 +6180,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 209,
     "fields": {
       "exercise_id": "Af0EW2I",
@@ -6211,7 +6211,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 210,
     "fields": {
       "exercise_id": "afv0ZAS",
@@ -6241,7 +6241,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 211,
     "fields": {
       "exercise_id": "aHDy5O5",
@@ -6270,7 +6270,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 212,
     "fields": {
       "exercise_id": "ainizkb",
@@ -6299,7 +6299,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 213,
     "fields": {
       "exercise_id": "Am02iPd",
@@ -6329,7 +6329,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 214,
     "fields": {
       "exercise_id": "ANbbry2",
@@ -6357,7 +6357,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 215,
     "fields": {
       "exercise_id": "AQ0mC4Y",
@@ -6386,7 +6386,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 216,
     "fields": {
       "exercise_id": "AQIhRjM",
@@ -6417,7 +6417,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 217,
     "fields": {
       "exercise_id": "aqvSOQE",
@@ -6447,7 +6447,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 218,
     "fields": {
       "exercise_id": "AR0ig3o",
@@ -6476,7 +6476,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 219,
     "fields": {
       "exercise_id": "arsYEd3",
@@ -6506,7 +6506,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 220,
     "fields": {
       "exercise_id": "arvaszz",
@@ -6536,7 +6536,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 221,
     "fields": {
       "exercise_id": "aTNKZiC",
@@ -6566,7 +6566,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 222,
     "fields": {
       "exercise_id": "aVs3BR3",
@@ -6596,7 +6596,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 223,
     "fields": {
       "exercise_id": "AwAIlSo",
@@ -6626,7 +6626,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 224,
     "fields": {
       "exercise_id": "aWedzZX",
@@ -6655,7 +6655,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 225,
     "fields": {
       "exercise_id": "awG04cF",
@@ -6684,7 +6684,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 226,
     "fields": {
       "exercise_id": "AX1kB0o",
@@ -6714,7 +6714,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 227,
     "fields": {
       "exercise_id": "aXcUyKb",
@@ -6744,7 +6744,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 228,
     "fields": {
       "exercise_id": "aXtJhlg",
@@ -6775,7 +6775,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 229,
     "fields": {
       "exercise_id": "ayAHcEm",
@@ -6806,7 +6806,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 230,
     "fields": {
       "exercise_id": "B1EVP9F",
@@ -6835,7 +6835,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 231,
     "fields": {
       "exercise_id": "b2Uoz54",
@@ -6863,7 +6863,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 232,
     "fields": {
       "exercise_id": "B3Rxp6L",
@@ -6894,7 +6894,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 233,
     "fields": {
       "exercise_id": "b5uBMv2",
@@ -6924,7 +6924,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 234,
     "fields": {
       "exercise_id": "B5xca8s",
@@ -6954,7 +6954,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 235,
     "fields": {
       "exercise_id": "b63ZzGe",
@@ -6985,7 +6985,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 236,
     "fields": {
       "exercise_id": "B6dAO1t",
@@ -7015,7 +7015,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 237,
     "fields": {
       "exercise_id": "b9kqlBy",
@@ -7044,7 +7044,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 238,
     "fields": {
       "exercise_id": "BaE7O6U",
@@ -7072,7 +7072,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 239,
     "fields": {
       "exercise_id": "BbfB8Gb",
@@ -7101,7 +7101,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 240,
     "fields": {
       "exercise_id": "bBi35y3",
@@ -7130,7 +7130,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 241,
     "fields": {
       "exercise_id": "bbLR7fB",
@@ -7158,7 +7158,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 242,
     "fields": {
       "exercise_id": "BCs0G2F",
@@ -7187,7 +7187,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 243,
     "fields": {
       "exercise_id": "bdWcbaU",
@@ -7217,7 +7217,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 244,
     "fields": {
       "exercise_id": "BeReYBf",
@@ -7247,7 +7247,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 245,
     "fields": {
       "exercise_id": "bfiHMpI",
@@ -7277,7 +7277,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 246,
     "fields": {
       "exercise_id": "Bg5JKSH",
@@ -7307,7 +7307,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 247,
     "fields": {
       "exercise_id": "BgljGjd",
@@ -7338,7 +7338,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 248,
     "fields": {
       "exercise_id": "BJ0Hz5L",
@@ -7368,7 +7368,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 249,
     "fields": {
       "exercise_id": "bJYHBIN",
@@ -7397,7 +7397,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 250,
     "fields": {
       "exercise_id": "bKWbrTA",
@@ -7427,7 +7427,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 251,
     "fields": {
       "exercise_id": "BkxB8LW",
@@ -7456,7 +7456,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 252,
     "fields": {
       "exercise_id": "BL3GHeY",
@@ -7486,7 +7486,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 253,
     "fields": {
       "exercise_id": "blBXysN",
@@ -7514,7 +7514,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 254,
     "fields": {
       "exercise_id": "BLCvwr2",
@@ -7544,7 +7544,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 255,
     "fields": {
       "exercise_id": "bmBf7LN",
@@ -7573,7 +7573,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 256,
     "fields": {
       "exercise_id": "BMMolZ3",
@@ -7601,7 +7601,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 257,
     "fields": {
       "exercise_id": "BmrwWzo",
@@ -7633,7 +7633,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 258,
     "fields": {
       "exercise_id": "bmwlYvD",
@@ -7663,7 +7663,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 259,
     "fields": {
       "exercise_id": "Bn6TXyO",
@@ -7691,7 +7691,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 260,
     "fields": {
       "exercise_id": "bOOdeyc",
@@ -7721,7 +7721,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 261,
     "fields": {
       "exercise_id": "Bpkf41o",
@@ -7752,7 +7752,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 262,
     "fields": {
       "exercise_id": "BqgCRif",
@@ -7781,7 +7781,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 263,
     "fields": {
       "exercise_id": "bQHPBU3",
@@ -7811,7 +7811,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 264,
     "fields": {
       "exercise_id": "BReCuOn",
@@ -7840,7 +7840,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 265,
     "fields": {
       "exercise_id": "bRlbdjK",
@@ -7870,7 +7870,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 266,
     "fields": {
       "exercise_id": "bTpEUcm",
@@ -7900,7 +7900,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 267,
     "fields": {
       "exercise_id": "bWlZvXh",
@@ -7931,7 +7931,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 268,
     "fields": {
       "exercise_id": "BWnJR72",
@@ -7959,7 +7959,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 269,
     "fields": {
       "exercise_id": "BwSNDGt",
@@ -7988,7 +7988,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 270,
     "fields": {
       "exercise_id": "bZGHsAZ",
@@ -8019,7 +8019,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 271,
     "fields": {
       "exercise_id": "C0eCeEt",
@@ -8050,7 +8050,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 272,
     "fields": {
       "exercise_id": "C0MA9bC",
@@ -8080,7 +8080,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 273,
     "fields": {
       "exercise_id": "c16nYGA",
@@ -8112,7 +8112,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 274,
     "fields": {
       "exercise_id": "C31LMnP",
@@ -8143,7 +8143,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 275,
     "fields": {
       "exercise_id": "C5jncD2",
@@ -8171,7 +8171,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 276,
     "fields": {
       "exercise_id": "c8f5cSY",
@@ -8200,7 +8200,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 277,
     "fields": {
       "exercise_id": "c8oybX6",
@@ -8231,7 +8231,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 278,
     "fields": {
       "exercise_id": "C9LuR4A",
@@ -8261,7 +8261,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 279,
     "fields": {
       "exercise_id": "c9MnDRp",
@@ -8290,7 +8290,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 280,
     "fields": {
       "exercise_id": "Ca76jUE",
@@ -8319,7 +8319,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 281,
     "fields": {
       "exercise_id": "cA9FuWG",
@@ -8348,7 +8348,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 282,
     "fields": {
       "exercise_id": "cALkHHX",
@@ -8376,7 +8376,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 283,
     "fields": {
       "exercise_id": "cALKspW",
@@ -8406,7 +8406,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 284,
     "fields": {
       "exercise_id": "CB8WET1",
@@ -8437,7 +8437,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 285,
     "fields": {
       "exercise_id": "CbFSYC1",
@@ -8467,7 +8467,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 286,
     "fields": {
       "exercise_id": "cbuFJrn",
@@ -8496,7 +8496,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 287,
     "fields": {
       "exercise_id": "CcWEoWV",
@@ -8526,7 +8526,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 288,
     "fields": {
       "exercise_id": "CggQhII",
@@ -8555,7 +8555,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 289,
     "fields": {
       "exercise_id": "chfnQnM",
@@ -8586,7 +8586,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 290,
     "fields": {
       "exercise_id": "CHpahtl",
@@ -8616,7 +8616,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 291,
     "fields": {
       "exercise_id": "CI6baTY",
@@ -8645,7 +8645,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 292,
     "fields": {
       "exercise_id": "cJgSTmh",
@@ -8674,7 +8674,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 293,
     "fields": {
       "exercise_id": "CMAxnsG",
@@ -8705,7 +8705,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 294,
     "fields": {
       "exercise_id": "CmEr4pM",
@@ -8736,7 +8736,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 295,
     "fields": {
       "exercise_id": "CosupLu",
@@ -8767,7 +8767,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 296,
     "fields": {
       "exercise_id": "CqhoytW",
@@ -8797,7 +8797,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 297,
     "fields": {
       "exercise_id": "D1xYJAU",
@@ -8826,7 +8826,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 298,
     "fields": {
       "exercise_id": "d5bTEPV",
@@ -8858,7 +8858,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 299,
     "fields": {
       "exercise_id": "d960PgE",
@@ -8887,7 +8887,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 300,
     "fields": {
       "exercise_id": "D9qe7CM",
@@ -8918,7 +8918,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 301,
     "fields": {
       "exercise_id": "d9Xaxq6",
@@ -8948,7 +8948,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 302,
     "fields": {
       "exercise_id": "daBmy1Y",
@@ -8978,7 +8978,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 303,
     "fields": {
       "exercise_id": "dB07vDu",
@@ -9008,7 +9008,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 304,
     "fields": {
       "exercise_id": "DB0n8AG",
@@ -9039,7 +9039,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 305,
     "fields": {
       "exercise_id": "dCJnuVq",
@@ -9068,7 +9068,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 306,
     "fields": {
       "exercise_id": "dCPESfR",
@@ -9096,7 +9096,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 307,
     "fields": {
       "exercise_id": "DeDThfG",
@@ -9125,7 +9125,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 308,
     "fields": {
       "exercise_id": "DFGXwZr",
@@ -9156,7 +9156,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 309,
     "fields": {
       "exercise_id": "dFSNDOA",
@@ -9186,7 +9186,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 310,
     "fields": {
       "exercise_id": "dG5Smob",
@@ -9220,7 +9220,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 311,
     "fields": {
       "exercise_id": "DICPHtq",
@@ -9249,7 +9249,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 312,
     "fields": {
       "exercise_id": "dK9394r",
@@ -9283,7 +9283,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 313,
     "fields": {
       "exercise_id": "dNFYIU1",
@@ -9313,7 +9313,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 314,
     "fields": {
       "exercise_id": "DOoWcnA",
@@ -9342,7 +9342,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 315,
     "fields": {
       "exercise_id": "DotAgEF",
@@ -9371,7 +9371,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 316,
     "fields": {
       "exercise_id": "dPmaUaU",
@@ -9398,7 +9398,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 317,
     "fields": {
       "exercise_id": "drfGhTV",
@@ -9428,7 +9428,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 318,
     "fields": {
       "exercise_id": "dRTfGZT",
@@ -9457,7 +9457,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 319,
     "fields": {
       "exercise_id": "DsgkuIt",
@@ -9485,7 +9485,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 320,
     "fields": {
       "exercise_id": "dTg95eZ",
@@ -9513,7 +9513,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 321,
     "fields": {
       "exercise_id": "DU7I633",
@@ -9544,7 +9544,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 322,
     "fields": {
       "exercise_id": "DwhEmmE",
@@ -9573,7 +9573,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 323,
     "fields": {
       "exercise_id": "e25F58f",
@@ -9603,7 +9603,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 324,
     "fields": {
       "exercise_id": "ealLwvX",
@@ -9636,7 +9636,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 325,
     "fields": {
       "exercise_id": "EAs3xL9",
@@ -9666,7 +9666,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 326,
     "fields": {
       "exercise_id": "Eh2v5Iu",
@@ -9696,7 +9696,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 327,
     "fields": {
       "exercise_id": "EIeI8Vf",
@@ -9727,7 +9727,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 328,
     "fields": {
       "exercise_id": "EKXOMEh",
@@ -9758,7 +9758,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 329,
     "fields": {
       "exercise_id": "enxnJcM",
@@ -9786,7 +9786,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 330,
     "fields": {
       "exercise_id": "eOrFCnx",
@@ -9814,7 +9814,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 331,
     "fields": {
       "exercise_id": "EpKrFiv",
@@ -9845,7 +9845,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 332,
     "fields": {
       "exercise_id": "ErqK3UL",
@@ -9878,7 +9878,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 333,
     "fields": {
       "exercise_id": "euq4pwp",
@@ -9907,7 +9907,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 334,
     "fields": {
       "exercise_id": "eVxAzgz",
@@ -9935,7 +9935,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 335,
     "fields": {
       "exercise_id": "eXFXCY0",
@@ -9965,7 +9965,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 336,
     "fields": {
       "exercise_id": "eXMFHww",
@@ -9994,7 +9994,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 337,
     "fields": {
       "exercise_id": "eYmsEPR",
@@ -10024,7 +10024,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 338,
     "fields": {
       "exercise_id": "eZ79rbI",
@@ -10055,7 +10055,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 339,
     "fields": {
       "exercise_id": "Ezpnw9d",
@@ -10084,7 +10084,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 340,
     "fields": {
       "exercise_id": "f1jf47L",
@@ -10113,7 +10113,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 341,
     "fields": {
       "exercise_id": "f7Y9eDZ",
@@ -10144,7 +10144,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 342,
     "fields": {
       "exercise_id": "f9lVSSI",
@@ -10175,7 +10175,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 343,
     "fields": {
       "exercise_id": "FFRP97T",
@@ -10203,7 +10203,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 344,
     "fields": {
       "exercise_id": "fgc9Xdl",
@@ -10233,7 +10233,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 345,
     "fields": {
       "exercise_id": "fI18Rbc",
@@ -10262,7 +10262,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 346,
     "fields": {
       "exercise_id": "fKZgDEO",
@@ -10291,7 +10291,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 347,
     "fields": {
       "exercise_id": "fNGumX0",
@@ -10323,7 +10323,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 348,
     "fields": {
       "exercise_id": "fprd84i",
@@ -10351,7 +10351,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 349,
     "fields": {
       "exercise_id": "FS63wTN",
@@ -10379,7 +10379,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 350,
     "fields": {
       "exercise_id": "FxhcxUW",
@@ -10409,7 +10409,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 351,
     "fields": {
       "exercise_id": "FY3UdNT",
@@ -10440,7 +10440,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 352,
     "fields": {
       "exercise_id": "gTGciXz",
@@ -10471,7 +10471,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 353,
     "fields": {
       "exercise_id": "hfmQ0Tz",
@@ -10501,7 +10501,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 354,
     "fields": {
       "exercise_id": "HtfCpfi",
@@ -10531,7 +10531,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 355,
     "fields": {
       "exercise_id": "I4tibZG",
@@ -10563,7 +10563,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 356,
     "fields": {
       "exercise_id": "ia6kIIl",
@@ -10593,7 +10593,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 357,
     "fields": {
       "exercise_id": "Ia7tumC",
@@ -10623,7 +10623,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 358,
     "fields": {
       "exercise_id": "Ie9UGty",
@@ -10653,7 +10653,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 359,
     "fields": {
       "exercise_id": "IeDEXTe",
@@ -10685,7 +10685,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 360,
     "fields": {
       "exercise_id": "iPm26QU",
@@ -10716,7 +10716,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 361,
     "fields": {
       "exercise_id": "ipvgBnC",
@@ -10744,7 +10744,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 362,
     "fields": {
       "exercise_id": "j74M6Zn",
@@ -10775,7 +10775,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 363,
     "fields": {
       "exercise_id": "J9zIWig",
@@ -10808,7 +10808,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 364,
     "fields": {
       "exercise_id": "jl6uxZV",
@@ -10837,7 +10837,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 365,
     "fields": {
       "exercise_id": "KI1DjNN",
@@ -10866,7 +10866,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 366,
     "fields": {
       "exercise_id": "km2Ljzj",
@@ -10896,7 +10896,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 367,
     "fields": {
       "exercise_id": "ktsFQAZ",
@@ -10926,7 +10926,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 368,
     "fields": {
       "exercise_id": "LrV4s90",
@@ -10957,7 +10957,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 369,
     "fields": {
       "exercise_id": "Lsqrgh4",
@@ -10987,7 +10987,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 370,
     "fields": {
       "exercise_id": "LsZkfU6",
@@ -11016,7 +11016,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 371,
     "fields": {
       "exercise_id": "m0tCHqc",
@@ -11045,7 +11045,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 372,
     "fields": {
       "exercise_id": "M2Pm3zj",
@@ -11074,7 +11074,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 373,
     "fields": {
       "exercise_id": "mKwcrHn",
@@ -11103,7 +11103,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 374,
     "fields": {
       "exercise_id": "mr7pkqP",
@@ -11138,7 +11138,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 375,
     "fields": {
       "exercise_id": "MrgP9L6",
@@ -11168,7 +11168,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 376,
     "fields": {
       "exercise_id": "mtXengz",
@@ -11196,7 +11196,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 377,
     "fields": {
       "exercise_id": "mym4hJo",
@@ -11225,7 +11225,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 378,
     "fields": {
       "exercise_id": "oLrKqDH",
@@ -11255,7 +11255,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 379,
     "fields": {
       "exercise_id": "oQRJYkC",
@@ -11285,7 +11285,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 380,
     "fields": {
       "exercise_id": "PrQbjvB",
@@ -11316,7 +11316,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 381,
     "fields": {
       "exercise_id": "PzNxakt",
@@ -11345,7 +11345,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 382,
     "fields": {
       "exercise_id": "q8aHNoF",
@@ -11374,7 +11374,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 383,
     "fields": {
       "exercise_id": "qDnGfDb",
@@ -11404,7 +11404,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 384,
     "fields": {
       "exercise_id": "qOKcgVP",
@@ -11435,7 +11435,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 385,
     "fields": {
       "exercise_id": "QsSQWbf",
@@ -11464,7 +11464,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 386,
     "fields": {
       "exercise_id": "r29jP7S",
@@ -11493,7 +11493,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 387,
     "fields": {
       "exercise_id": "rEhi2o5",
@@ -11522,7 +11522,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 388,
     "fields": {
       "exercise_id": "rGwhJ5o",
@@ -11550,7 +11550,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 389,
     "fields": {
       "exercise_id": "RJgzwny",
@@ -11580,7 +11580,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 390,
     "fields": {
       "exercise_id": "rjiM4L3",
@@ -11611,7 +11611,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 391,
     "fields": {
       "exercise_id": "SJAA2IQ",
@@ -11640,7 +11640,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 392,
     "fields": {
       "exercise_id": "tnaj0mT",
@@ -11669,7 +11669,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 393,
     "fields": {
       "exercise_id": "trmte8s",
@@ -11697,7 +11697,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 394,
     "fields": {
       "exercise_id": "u5ESqzH",
@@ -11726,7 +11726,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 395,
     "fields": {
       "exercise_id": "uL9CsKm",
@@ -11753,7 +11753,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 396,
     "fields": {
       "exercise_id": "UoX77uR",
@@ -11783,7 +11783,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 397,
     "fields": {
       "exercise_id": "UtmIqcI",
@@ -11812,7 +11812,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 398,
     "fields": {
       "exercise_id": "v6EKk0O",
@@ -11842,7 +11842,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 399,
     "fields": {
       "exercise_id": "VhX2JdE",
@@ -11872,7 +11872,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 400,
     "fields": {
       "exercise_id": "vobtVkm",
@@ -11901,7 +11901,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 401,
     "fields": {
       "exercise_id": "vUTfFHw",
@@ -11930,7 +11930,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 402,
     "fields": {
       "exercise_id": "VW88JNd",
@@ -11960,7 +11960,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 403,
     "fields": {
       "exercise_id": "x2chWLO",
@@ -11989,7 +11989,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 404,
     "fields": {
       "exercise_id": "X7jbxra",
@@ -12017,7 +12017,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 405,
     "fields": {
       "exercise_id": "XIHEoCG",
@@ -12045,7 +12045,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 406,
     "fields": {
       "exercise_id": "xo6sENf",
@@ -12075,7 +12075,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 407,
     "fields": {
       "exercise_id": "XSCHmiI",
@@ -12105,7 +12105,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 408,
     "fields": {
       "exercise_id": "Y4QlY8z",
@@ -12137,7 +12137,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 409,
     "fields": {
       "exercise_id": "y5p0H8a",
@@ -12167,7 +12167,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 410,
     "fields": {
       "exercise_id": "ykUOVze",
@@ -12196,7 +12196,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 411,
     "fields": {
       "exercise_id": "yl2IYyy",
@@ -12225,7 +12225,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 412,
     "fields": {
       "exercise_id": "YtaCTYl",
@@ -12254,7 +12254,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 413,
     "fields": {
       "exercise_id": "ywaNfuh",
@@ -12284,7 +12284,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 414,
     "fields": {
       "exercise_id": "yzYH9pI",
@@ -12313,7 +12313,7 @@
     }
   },
   {
-    "model": "exercises.exercise",
+    "model": "workouts.exercise",
     "pk": 415,
     "fields": {
       "exercise_id": "zfNHMN9",
