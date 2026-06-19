@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -7,8 +8,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, calculate_recommended_calories, error_response, success_response
 
-from .models import Food, Meal
-from .serializers import FoodSerializer, MealSerializer
+from .models import Food, Meal, SavedMeal
+from .serializers import (
+    FoodSerializer,
+    MealSerializer,
+    SavedMealCreateMealSerializer,
+    SavedMealSerializer,
+)
 
 
 class FoodListCreateView(CommonResponseAPIView):
@@ -283,3 +289,122 @@ class MealDetailView(CommonResponseAPIView):
 
         meal.delete()
         return success_response('식단 기록이 삭제되었습니다.', None)
+
+
+class SavedMealListCreateView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        saved_meals = SavedMeal.objects.filter(user=request.user).prefetch_related('items__food')
+        serializer = SavedMealSerializer(saved_meals.order_by('-id'), many=True)
+        return success_response('저장 식단 목록 조회 성공', serializer.data)
+
+    def post(self, request):
+        serializer = SavedMealSerializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return error_response('저장 식단 등록에 실패했습니다.', serializer.errors)
+
+        try:
+            saved_meal = serializer.save(user=request.user)
+        except ValidationError as exc:
+            return error_response('저장 식단 등록에 실패했습니다.', exc.detail)
+
+        data = SavedMealSerializer(saved_meal).data
+        return success_response('저장 식단이 등록되었습니다.', data, status.HTTP_201_CREATED)
+
+
+class SavedMealDetailView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_saved_meal(self, request, saved_meal_id, message):
+        try:
+            return SavedMeal.objects.prefetch_related('items__food').get(
+                id=saved_meal_id,
+                user=request.user,
+            )
+        except SavedMeal.DoesNotExist:
+            return error_response(
+                message,
+                {'saved_meal_id': ['조회 가능한 저장 식단이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    def get(self, request, saved_meal_id):
+        saved_meal = self.get_saved_meal(request, saved_meal_id, '저장 식단 상세 조회에 실패했습니다.')
+        if not isinstance(saved_meal, SavedMeal):
+            return saved_meal
+
+        return success_response('저장 식단 상세 조회 성공', SavedMealSerializer(saved_meal).data)
+
+    def patch(self, request, saved_meal_id):
+        saved_meal = self.get_saved_meal(request, saved_meal_id, '저장 식단 수정에 실패했습니다.')
+        if not isinstance(saved_meal, SavedMeal):
+            return saved_meal
+
+        serializer = SavedMealSerializer(
+            saved_meal,
+            data=request.data,
+            partial=True,
+            context={'request': request},
+        )
+        if not serializer.is_valid():
+            return error_response('저장 식단 수정에 실패했습니다.', serializer.errors)
+
+        try:
+            saved_meal = serializer.save()
+        except ValidationError as exc:
+            return error_response('저장 식단 수정에 실패했습니다.', exc.detail)
+
+        return success_response('저장 식단이 수정되었습니다.', SavedMealSerializer(saved_meal).data)
+
+    def delete(self, request, saved_meal_id):
+        saved_meal = self.get_saved_meal(request, saved_meal_id, '저장 식단 삭제에 실패했습니다.')
+        if not isinstance(saved_meal, SavedMeal):
+            return saved_meal
+
+        saved_meal.delete()
+        return success_response('저장 식단이 삭제되었습니다.', None)
+
+
+class SavedMealCreateMealView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, saved_meal_id):
+        try:
+            saved_meal = SavedMeal.objects.prefetch_related('items').get(
+                id=saved_meal_id,
+                user=request.user,
+            )
+        except SavedMeal.DoesNotExist:
+            return error_response(
+                '식단 기록 생성에 실패했습니다.',
+                {'saved_meal_id': ['조회 가능한 저장 식단이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        request_serializer = SavedMealCreateMealSerializer(data=request.data)
+        if not request_serializer.is_valid():
+            return error_response('식단 기록 생성에 실패했습니다.', request_serializer.errors)
+
+        meal_data = {
+            **request_serializer.validated_data,
+            'items': [
+                {'food_id': item.food_id, 'amount': item.amount}
+                for item in saved_meal.items.all()
+            ],
+        }
+        meal_serializer = MealSerializer(data=meal_data, context={'request': request})
+        if not meal_serializer.is_valid():
+            return error_response('식단 기록 생성에 실패했습니다.', meal_serializer.errors)
+
+        try:
+            with transaction.atomic():
+                meal = meal_serializer.save(user=request.user)
+        except ValidationError as exc:
+            return error_response('식단 기록 생성에 실패했습니다.', exc.detail)
+
+        return success_response(
+            '저장 식단으로 식단 기록을 생성했습니다.',
+            MealSerializer(meal).data,
+            status.HTTP_201_CREATED,
+        )
