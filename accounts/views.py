@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, LogoutSerializer, SignupSerializer
+from .models import Profile
+from .serializers import LoginSerializer, LogoutSerializer, ProfileSerializer, SignupSerializer
 
 
 def success_response(message, data=None, status_code=status.HTTP_200_OK):
@@ -122,3 +123,84 @@ class MeView(CommonResponseAPIView):
             'has_profile': hasattr(request.user, 'profile'),
         }
         return success_response('내 정보 조회 성공', data)
+
+
+class MyProfileView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = request.user.profile
+        except Profile.DoesNotExist:
+            return error_response(
+                '프로필을 찾을 수 없습니다.',
+                {'profile': ['프로필을 먼저 등록해주세요.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        return success_response('프로필 조회 성공', ProfileSerializer(profile).data)
+
+    def put(self, request):
+        profile = getattr(request.user, 'profile', None)
+        serializer = ProfileSerializer(instance=profile, data=request.data)
+        if not serializer.is_valid():
+            return error_response('프로필 저장에 실패했습니다.', serializer.errors)
+
+        serializer.save(user=request.user)
+        return success_response('프로필이 저장되었습니다.', serializer.data)
+
+
+class CalorieTargetView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = request.user.profile
+        except Profile.DoesNotExist:
+            return error_response(
+                '권장 칼로리 계산에 실패했습니다.',
+                {'profile': ['프로필을 먼저 등록해주세요.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        recommended_calories = calculate_recommended_calories(profile)
+        carbohydrate_ratio = 50
+        protein_ratio = 30
+        fat_ratio = 20
+
+        data = {
+            'recommended_calories': recommended_calories,
+            'carbohydrate_ratio': carbohydrate_ratio,
+            'protein_ratio': protein_ratio,
+            'fat_ratio': fat_ratio,
+            'recommended_carbohydrate': round(recommended_calories * carbohydrate_ratio / 100 / 4, 1),
+            'recommended_protein': round(recommended_calories * protein_ratio / 100 / 4, 1),
+            'recommended_fat': round(recommended_calories * fat_ratio / 100 / 9, 1),
+        }
+        return success_response('권장 칼로리 계산이 완료되었습니다.', data)
+
+
+def calculate_recommended_calories(profile):
+    gender = profile.gender.lower()
+    if gender == 'male':
+        bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
+    elif gender == 'female':
+        bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161
+    else:
+        bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 78
+
+    activity_multipliers = {
+        'low': 1.2,
+        'normal': 1.55,
+        'high': 1.725,
+    }
+    goal_adjustments = {
+        'fat_loss': -500,
+        'muscle_gain': 300,
+        'maintenance': 0,
+        'weight_gain': 500,
+    }
+
+    calories = bmr * activity_multipliers.get(profile.activity_level, 1.2)
+    calories += goal_adjustments.get(profile.workout_goal, 0)
+    return max(round(calories), 1200)

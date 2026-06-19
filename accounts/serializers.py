@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
+from .models import Profile
+
 
 class SignupSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
@@ -56,3 +58,34 @@ class LoginSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = [
+            'id',
+            'gender',
+            'age',
+            'height',
+            'weight',
+            'body_type',
+            'activity_level',
+            'workout_goal',
+            'workout_experience',
+        ]
+
+    def validate_age(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('나이는 1 이상이어야 합니다.')
+        return value
+
+    def validate_height(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('키는 0보다 커야 합니다.')
+        return value
+
+    def validate_weight(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('몸무게는 0보다 커야 합니다.')
+        return value
