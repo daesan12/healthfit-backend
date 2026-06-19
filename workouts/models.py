@@ -54,3 +54,27 @@ class RoutineItem(models.Model):
 
     def __str__(self):
         return f'{self.routine.name}: {self.exercise.name}'
+
+
+class WorkoutLog(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='workout_logs',
+    )
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    routine = models.ForeignKey(
+        WorkoutRoutine,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    workout_date = models.DateField()
+    workout_time = models.PositiveIntegerField()
+    set_count = models.PositiveIntegerField()
+    repetition = models.PositiveIntegerField()
+    memo = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} {self.workout_date} {self.exercise.name}'

@@ -5,6 +5,8 @@ from .views import (
     ExerciseListView,
     RoutineItemCreateView,
     RoutineItemDetailView,
+    WorkoutLogDetailView,
+    WorkoutLogListCreateView,
     WorkoutRoutineDetailView,
     WorkoutRoutineListCreateView,
 )
@@ -29,4 +31,6 @@ urlpatterns = [
         RoutineItemDetailView.as_view(),
         name='routine-item-detail',
     ),
+    path('workout-logs/', WorkoutLogListCreateView.as_view(), name='workout-log-list-create'),
+    path('workout-logs/<int:log_id>/', WorkoutLogDetailView.as_view(), name='workout-log-detail'),
 ]

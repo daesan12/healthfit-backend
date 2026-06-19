@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Routine Item APIs",
-    "description": "Workout Routine Item 생성, 수정, 삭제 API",
+    "name": "Workout Log APIs",
+    "description": "Workout Log 목록, 생성, 상세, 수정, 삭제 API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,7 +16,14 @@
   },
   "item": [
     {
-      "name": "루틴 항목 추가",
+      "name": "운동 기록 목록 조회",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/workout-logs/"
+      }
+    },
+    {
+      "name": "운동 기록 생성",
       "request": {
         "method": "POST",
         "header": [
@@ -27,18 +34,25 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"exercise_id\": {{exercise_id}},\n  \"order\": 1,\n  \"sets\": 3,\n  \"reps\": 12,\n  \"weight\": 20,\n  \"rest_seconds\": 60\n}",
+          "raw": "{\n  \"exercise_id\": {{exercise_id}},\n  \"routine_id\": {{routine_id}},\n  \"workout_date\": \"2026-06-20\",\n  \"workout_time\": 30,\n  \"set_count\": 3,\n  \"repetition\": 10,\n  \"memo\": \"무리 없이 완료\"\n}",
           "options": {
             "raw": {
               "language": "json"
             }
           }
         },
-        "url": "{{base_url}}/api/v1/workout-routines/{{routine_id}}/items/"
+        "url": "{{base_url}}/api/v1/workout-logs/"
       }
     },
     {
-      "name": "루틴 항목 수정",
+      "name": "운동 기록 상세 조회",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/workout-logs/{{log_id}}/"
+      }
+    },
+    {
+      "name": "운동 기록 수정",
       "request": {
         "method": "PATCH",
         "header": [
@@ -49,21 +63,21 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"order\": 1,\n  \"sets\": 5,\n  \"reps\": 10,\n  \"weight\": 30,\n  \"rest_seconds\": 90\n}",
+          "raw": "{\n  \"workout_time\": 40,\n  \"set_count\": 4,\n  \"repetition\": 12,\n  \"memo\": \"수정된 운동 기록\"\n}",
           "options": {
             "raw": {
               "language": "json"
             }
           }
         },
-        "url": "{{base_url}}/api/v1/routine-items/{{routine_item_id}}/"
+        "url": "{{base_url}}/api/v1/workout-logs/{{log_id}}/"
       }
     },
     {
-      "name": "루틴 항목 삭제",
+      "name": "운동 기록 삭제",
       "request": {
         "method": "DELETE",
-        "url": "{{base_url}}/api/v1/routine-items/{{routine_item_id}}/"
+        "url": "{{base_url}}/api/v1/workout-logs/{{log_id}}/"
       }
     }
   ],
@@ -77,15 +91,15 @@
       "value": ""
     },
     {
+      "key": "exercise_id",
+      "value": "1"
+    },
+    {
       "key": "routine_id",
       "value": "1"
     },
     {
-      "key": "routine_item_id",
-      "value": "1"
-    },
-    {
-      "key": "exercise_id",
+      "key": "log_id",
       "value": "1"
     }
   ]

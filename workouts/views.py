@@ -4,8 +4,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, error_response, success_response
 
-from .models import Exercise, RoutineItem, WorkoutRoutine
-from .serializers import ExerciseSerializer, RoutineItemSerializer, WorkoutRoutineSerializer
+from .models import Exercise, RoutineItem, WorkoutLog, WorkoutRoutine
+from .serializers import (
+    ExerciseSerializer,
+    RoutineItemSerializer,
+    WorkoutLogSerializer,
+    WorkoutRoutineSerializer,
+)
 
 
 def visible_exercises(user):
@@ -234,3 +239,90 @@ class RoutineItemDetailView(CommonResponseAPIView):
 
         item.delete()
         return success_response('루틴 항목이 삭제되었습니다.', None)
+
+
+class WorkoutLogListCreateView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        logs = WorkoutLog.objects.filter(user=request.user).select_related('exercise', 'routine')
+
+        date = request.query_params.get('date')
+        if date:
+            logs = logs.filter(workout_date=date)
+
+        start_date = request.query_params.get('start_date')
+        if start_date:
+            logs = logs.filter(workout_date__gte=start_date)
+
+        end_date = request.query_params.get('end_date')
+        if end_date:
+            logs = logs.filter(workout_date__lte=end_date)
+
+        routine_id = request.query_params.get('routine_id')
+        if routine_id:
+            logs = logs.filter(routine_id=routine_id)
+
+        serializer = WorkoutLogSerializer(logs.order_by('-workout_date', '-id'), many=True)
+        return success_response('운동 기록 목록 조회 성공', serializer.data)
+
+    def post(self, request):
+        serializer = WorkoutLogSerializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return error_response('운동 기록 등록에 실패했습니다.', serializer.errors)
+
+        log = serializer.save(user=request.user)
+        return success_response(
+            '운동 기록이 등록되었습니다.',
+            WorkoutLogSerializer(log).data,
+            status.HTTP_201_CREATED,
+        )
+
+
+class WorkoutLogDetailView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_log(self, request, log_id, message):
+        try:
+            return WorkoutLog.objects.select_related('exercise', 'routine').get(
+                pk=log_id,
+                user=request.user,
+            )
+        except WorkoutLog.DoesNotExist:
+            return error_response(
+                message,
+                {'log_id': ['조회 가능한 내 운동 기록이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    def get(self, request, log_id):
+        log = self.get_log(request, log_id, '운동 기록 상세 조회에 실패했습니다.')
+        if not isinstance(log, WorkoutLog):
+            return log
+
+        return success_response('운동 기록 상세 조회 성공', WorkoutLogSerializer(log).data)
+
+    def patch(self, request, log_id):
+        log = self.get_log(request, log_id, '운동 기록 수정에 실패했습니다.')
+        if not isinstance(log, WorkoutLog):
+            return log
+
+        serializer = WorkoutLogSerializer(
+            log,
+            data=request.data,
+            partial=True,
+            context={'request': request},
+        )
+        if not serializer.is_valid():
+            return error_response('운동 기록 수정에 실패했습니다.', serializer.errors)
+
+        serializer.save()
+        return success_response('운동 기록이 수정되었습니다.', serializer.data)
+
+    def delete(self, request, log_id):
+        log = self.get_log(request, log_id, '운동 기록 삭제에 실패했습니다.')
+        if not isinstance(log, WorkoutLog):
+            return log
+
+        log.delete()
+        return success_response('운동 기록이 삭제되었습니다.', None)

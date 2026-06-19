@@ -543,7 +543,7 @@
       "auth": "필요",
       "feature": "운동 기록 등록",
       "desc": "실제 수행한 운동 종류, 시간, 세트 수, 반복 횟수, 메모를 저장한다.",
-      "detail": "# 운동 기록 등록\n\n## Request Body\n```json\n{\"workout_id\":1,\"routine_id\":1,\"workout_date\":\"2026-06-17\",\"workout_time\":30,\"set_count\":3,\"repetition\":10,\"memo\":\"무리 없이 완료\"}\n```"
+      "detail": "# 운동 기록 등록\n\nexercise_id는 Exercise의 Django 데이터베이스 PK를 사용한다.\n\n## Request Body\n```json\n{\"exercise_id\":1,\"routine_id\":1,\"workout_date\":\"2026-06-17\",\"workout_time\":30,\"set_count\":3,\"repetition\":10,\"memo\":\"무리 없이 완료\"}\n```"
     },
     {
       "no": 46,
@@ -553,7 +553,7 @@
       "auth": "필요",
       "feature": "운동 기록 상세",
       "desc": "특정 운동 기록을 상세 조회한다.",
-      "detail": "# 운동 기록 상세\n\n운동 기록 정보와 연결된 운동 정보를 반환한다."
+      "detail": "# 운동 기록 상세\n\n운동 기록 정보와 연결된 운동 정보를 반환한다. Exercise 참조 필드는 exercise_id이며 Django 데이터베이스 PK 값이다."
     },
     {
       "no": 47,
