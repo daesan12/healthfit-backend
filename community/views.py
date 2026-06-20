@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -5,11 +6,44 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from accounts.views import CommonResponseAPIView, error_response, success_response
 
 from .models import Comment, Like, Post
-from .serializers import CommentSerializer, PostDetailSerializer, PostSerializer
+from .serializers import (
+    CommentSerializer,
+    PostDetailSerializer,
+    PostSerializer,
+    PublicProfileInfoSerializer,
+    PublicUserSerializer,
+)
 
 
 def post_queryset():
     return Post.objects.select_related('user').prefetch_related('comments__user', 'likes')
+
+
+class PublicProfileView(CommonResponseAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        User = get_user_model()
+        try:
+            user = User.objects.select_related('profile').get(pk=user_id)
+        except User.DoesNotExist:
+            return error_response(
+                '공개 프로필을 찾을 수 없습니다.',
+                {'user_id': ['존재하지 않는 사용자입니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        profile = getattr(user, 'profile', None)
+        posts = post_queryset().filter(user=user).order_by('-created_at', '-id')
+        data = {
+            'user': PublicUserSerializer(user).data,
+            'profile': PublicProfileInfoSerializer(profile).data if profile else None,
+            'post_count': posts.count(),
+            'posts': PostSerializer(posts, many=True, context={'request': request}).data,
+            'representative_saved_meal': None,
+            'representative_workout_routine': None,
+        }
+        return success_response('사용자 공개 프로필 조회 성공', data)
 
 
 class PostListCreateView(CommonResponseAPIView):

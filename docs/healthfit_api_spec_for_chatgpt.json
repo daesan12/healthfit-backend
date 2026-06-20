@@ -4,8 +4,8 @@
   "status": "current tested backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 56,
-  "planned_endpoint_count": 11,
+  "endpoint_count": 57,
+  "planned_endpoint_count": 10,
   "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
   "authentication": {
     "type": "JWT Bearer",
@@ -52,7 +52,8 @@
     "WorkoutLog": ["id", "exercise_id", "exercise", "routine_id", "workout_date", "workout_time", "set_count", "repetition", "memo", "created_at"],
     "Comment": ["id", "post_id", "author", "content", "created_at", "updated_at"],
     "Post": ["id", "author", "title", "content", "category", "comment_count", "like_count", "is_liked", "created_at", "updated_at"],
-    "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"]
+    "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
+    "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"]
   },
   "endpoints": [
     {
@@ -536,6 +537,15 @@
       "auth": "required",
       "body_fields": [],
       "response_data": "{post_id:integer,is_liked:boolean,like_count:integer}"
+    },
+    {
+      "id": 57,
+      "group": "Public Profile",
+      "method": "GET",
+      "url": "/api/v1/users/{user_id}/public-profile/",
+      "auth": "optional",
+      "body_fields": [],
+      "response_data": "PublicProfile"
     }
   ],
   "planned_endpoints": [
@@ -693,23 +703,6 @@
       "status": "미구현",
       "body_example": null,
       "expected_response_data": "AIChat[] (예상)"
-    },
-    {
-      "id": "P11",
-      "group": "Public Profile",
-      "method": "GET",
-      "url": "/api/v1/users/{user_id}/public-profile/",
-      "auth": "optional",
-      "purpose": "커뮤니티에서 다른 사용자의 공개 프로필과 공개 활동 요약을 조회한다.",
-      "status": "미구현",
-      "body_example": null,
-      "expected_response_data": {
-        "user": "공개 사용자 정보 (예상)",
-        "profile": "공개 프로필 정보 (예상)",
-        "posts": "Post[] (예상)",
-        "representative_saved_meal": "SavedMeal|null (예상)",
-        "representative_workout_routine": "WorkoutRoutine|null (예상)"
-      }
     }
   ]
 }

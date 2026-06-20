@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from accounts.models import Profile
+
 from .models import Comment, Post
 
 
@@ -8,6 +10,20 @@ class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['id', 'username']
+
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(source='date_joined', read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'username', 'created_at']
+
+
+class PublicProfileInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['workout_goal']
 
 
 class CommentSerializer(serializers.ModelSerializer):
