@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/v1/', include('diets.urls')),
     path('api/v1/', include('workouts.urls')),
     path('api/v1/', include('community.urls')),
+    path('api/v1/ai/', include('ai_services.urls')),
 ]

@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, calculate_recommended_calories, error_response, success_response
 
-from .models import Food, Meal, SavedMeal
+from .models import Food, Meal, MealItem, SavedMeal
 from .serializers import (
     FoodSerializer,
     MealSerializer,
@@ -386,22 +386,20 @@ class SavedMealCreateMealView(CommonResponseAPIView):
         if not request_serializer.is_valid():
             return error_response('식단 기록 생성에 실패했습니다.', request_serializer.errors)
 
-        meal_data = {
-            **request_serializer.validated_data,
-            'items': [
-                {'food_id': item.food_id, 'amount': item.amount}
-                for item in saved_meal.items.all()
-            ],
-        }
-        meal_serializer = MealSerializer(data=meal_data, context={'request': request})
-        if not meal_serializer.is_valid():
-            return error_response('식단 기록 생성에 실패했습니다.', meal_serializer.errors)
-
-        try:
-            with transaction.atomic():
-                meal = meal_serializer.save(user=request.user)
-        except ValidationError as exc:
-            return error_response('식단 기록 생성에 실패했습니다.', exc.detail)
+        with transaction.atomic():
+            meal = Meal.objects.create(user=request.user, **request_serializer.validated_data)
+            for item in saved_meal.items.select_related('food', 'food_snapshot'):
+                MealItem.objects.create(
+                    meal=meal,
+                    food=item.food,
+                    food_snapshot=item.food_snapshot,
+                    amount=item.amount,
+                    calories=item.calories,
+                    carbohydrate=item.carbohydrate,
+                    protein=item.protein,
+                    fat=item.fat,
+                )
+            meal.recalculate_totals()
 
         return success_response(
             '저장 식단으로 식단 기록을 생성했습니다.',

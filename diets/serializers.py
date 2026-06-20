@@ -44,8 +44,9 @@ class MealItemInputSerializer(serializers.Serializer):
 
 
 class MealItemSerializer(serializers.ModelSerializer):
-    food_id = serializers.IntegerField(source='food.id', read_only=True)
-    food_name = serializers.CharField(source='food.name', read_only=True)
+    food_id = serializers.SerializerMethodField()
+    food_name = serializers.CharField(read_only=True)
+    ai_food_key = serializers.SerializerMethodField()
 
     class Meta:
         model = MealItem
@@ -53,12 +54,19 @@ class MealItemSerializer(serializers.ModelSerializer):
             'id',
             'food_id',
             'food_name',
+            'ai_food_key',
             'amount',
             'calories',
             'carbohydrate',
             'protein',
             'fat',
         ]
+
+    def get_food_id(self, obj):
+        return obj.food_id
+
+    def get_ai_food_key(self, obj):
+        return obj.food_snapshot.ai_food_key if obj.food_snapshot_id else None
 
 
 class MealSerializer(serializers.ModelSerializer):
@@ -70,6 +78,8 @@ class MealSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'meal_type',
+            'meal_order',
+            'meal_label',
             'intake_date',
             'total_calories',
             'total_carbohydrate',
@@ -143,8 +153,9 @@ class MealSerializer(serializers.ModelSerializer):
 
 
 class SavedMealItemSerializer(serializers.ModelSerializer):
-    food_id = serializers.IntegerField(source='food.id', read_only=True)
-    food_name = serializers.CharField(source='food.name', read_only=True)
+    food_id = serializers.SerializerMethodField()
+    food_name = serializers.CharField(read_only=True)
+    ai_food_key = serializers.SerializerMethodField()
     calories = serializers.FloatField(read_only=True)
     carbohydrate = serializers.FloatField(read_only=True)
     protein = serializers.FloatField(read_only=True)
@@ -156,12 +167,19 @@ class SavedMealItemSerializer(serializers.ModelSerializer):
             'id',
             'food_id',
             'food_name',
+            'ai_food_key',
             'amount',
             'calories',
             'carbohydrate',
             'protein',
             'fat',
         ]
+
+    def get_food_id(self, obj):
+        return obj.food_id
+
+    def get_ai_food_key(self, obj):
+        return obj.food_snapshot.ai_food_key if obj.food_snapshot_id else None
 
 
 class SavedMealSerializer(serializers.ModelSerializer):

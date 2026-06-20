@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import AIRecommendation, DietFeedback
+
+
+admin.site.register(AIRecommendation)
+admin.site.register(DietFeedback)

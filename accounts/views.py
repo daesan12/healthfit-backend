@@ -394,9 +394,9 @@ class ProgressView(CommonResponseAPIView):
         for log in logs:
             values = daily[log.workout_date.isoformat()]
             values['workout_count'] += 1
-            values['total_workout_time'] += log.workout_time
+            values['total_workout_time'] += log.workout_time or 0
             workout_count += 1
-            total_workout_time += log.workout_time
+            total_workout_time += log.workout_time or 0
 
         return {
             'workout_count': workout_count,

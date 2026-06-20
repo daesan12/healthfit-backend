@@ -245,7 +245,9 @@ class WorkoutLogListCreateView(CommonResponseAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        logs = WorkoutLog.objects.filter(user=request.user).select_related('exercise', 'routine')
+        logs = WorkoutLog.objects.filter(user=request.user).select_related(
+            'exercise', 'routine'
+        ).prefetch_related('sets')
 
         date = request.query_params.get('date')
         if date:
@@ -262,6 +264,10 @@ class WorkoutLogListCreateView(CommonResponseAPIView):
         routine_id = request.query_params.get('routine_id')
         if routine_id:
             logs = logs.filter(routine_id=routine_id)
+
+        workout_id = request.query_params.get('workout_id') or request.query_params.get('exercise_id')
+        if workout_id:
+            logs = logs.filter(exercise_id=workout_id)
 
         serializer = WorkoutLogSerializer(logs.order_by('-workout_date', '-id'), many=True)
         return success_response('운동 기록 목록 조회 성공', serializer.data)
@@ -284,7 +290,7 @@ class WorkoutLogDetailView(CommonResponseAPIView):
 
     def get_log(self, request, log_id, message):
         try:
-            return WorkoutLog.objects.select_related('exercise', 'routine').get(
+            return WorkoutLog.objects.select_related('exercise', 'routine').prefetch_related('sets').get(
                 pk=log_id,
                 user=request.user,
             )

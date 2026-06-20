@@ -1,11 +1,11 @@
 {
   "name": "HealthFit Backend API",
   "version": "2026-06-20-current-backend",
-  "status": "current tested backend contract",
+  "status": "current backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 57,
-  "planned_endpoint_count": 10,
+  "endpoint_count": 67,
+  "planned_endpoint_count": 6,
   "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
   "authentication": {
     "type": "JWT Bearer",
@@ -31,10 +31,14 @@
     "frontend/src/api/client.js의 unwrapResponse()를 거친 함수는 내부 data를 직접 반환한다.",
     "운동 endpoint는 /exercises/이며 /workouts/는 존재하지 않는다.",
     "식단 대시보드는 /meals/dashboard/이다.",
-    "RoutineItem과 WorkoutLog 요청의 exercise_id는 숫자 Exercise DB PK이다.",
+    "RoutineItem은 exercise_id, 새 WorkoutLog와 AI progression은 workout_id를 사용하며 모두 숫자 Exercise DB PK이다. WorkoutLog의 기존 exercise_id도 호환된다.",
     "Exercise 응답의 문자열 exercise_id는 외부 ExerciseDB 또는 custom 식별자이다.",
     "Post 목록 data는 {count,page,page_size,results} 객체이다.",
     "오류 응답은 Axios의 error.response.data에서 읽는다.",
+    "AI API는 JWT 인증과 backend/.env의 GMS_KEY가 필요하다.",
+    "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
+    "food_source는 all, my_fridge, free이며 free 추천도 FoodSnapshot을 통해 저장할 수 있다.",
+    "exercise_source는 all 또는 my_exercises이다.",
     "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다."
   ],
   "schemas": {
@@ -42,18 +46,21 @@
     "Profile": ["id", "gender", "age", "height", "weight", "body_type", "activity_level", "workout_goal", "workout_experience"],
     "BodyRecord": ["id", "record_date", "weight", "body_fat_percentage", "skeletal_muscle_mass", "bmi", "created_at"],
     "Food": ["id", "name", "category", "calories", "carbohydrate", "protein", "fat", "user_id"],
-    "MealItem": ["id", "food_id", "food_name", "amount", "calories", "carbohydrate", "protein", "fat"],
-    "Meal": ["id", "meal_type", "intake_date", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "meal_items"],
-    "SavedMealItem": ["id", "food_id", "food_name", "amount", "calories", "carbohydrate", "protein", "fat"],
+    "MealItem": ["id", "food_id", "food_name", "ai_food_key", "amount", "calories", "carbohydrate", "protein", "fat"],
+    "Meal": ["id", "meal_type", "meal_order", "meal_label", "intake_date", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "meal_items"],
+    "SavedMealItem": ["id", "food_id", "food_name", "ai_food_key", "amount", "calories", "carbohydrate", "protein", "fat"],
     "SavedMeal": ["id", "name", "description", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "saved_meal_items", "created_at", "updated_at"],
     "Exercise": ["id", "exercise_id", "name", "gif_url", "body_parts", "equipments", "target_muscles", "secondary_muscles", "instructions", "user_id", "created_at", "updated_at"],
     "RoutineItem": ["id", "exercise", "order", "sets", "reps", "weight", "rest_seconds"],
     "WorkoutRoutine": ["id", "name", "description", "items", "created_at", "updated_at"],
-    "WorkoutLog": ["id", "exercise_id", "exercise", "routine_id", "workout_date", "workout_time", "set_count", "repetition", "memo", "created_at"],
+    "WorkoutLogSet": ["id", "set_order", "weight_kg", "repetition", "duration_seconds", "rpe", "is_warmup", "created_at", "updated_at"],
+    "WorkoutLog": ["id", "log_id", "workout_id", "exercise_id", "exercise", "routine_id", "workout_date", "workout_time", "set_count", "repetition", "memo", "sets", "created_at", "updated_at"],
     "Comment": ["id", "post_id", "author", "content", "created_at", "updated_at"],
     "Post": ["id", "author", "title", "content", "category", "comment_count", "like_count", "is_liked", "created_at", "updated_at"],
     "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
-    "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"]
+    "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
+    "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
+    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "strengths", "improvements", "recommended_actions", "feedback"]
   },
   "endpoints": [
     {
@@ -414,7 +421,7 @@
       "method": "GET",
       "url": "/api/v1/workout-logs/",
       "auth": "required",
-      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "routine_id:integer(optional)"],
+      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "workout_id:integer(optional)", "routine_id:integer(optional)", "exercise_id:integer(optional, legacy alias)"],
       "response_data": "WorkoutLog[]"
     },
     {
@@ -423,7 +430,7 @@
       "method": "POST",
       "url": "/api/v1/workout-logs/",
       "auth": "required",
-      "body_fields": ["exercise_id:integer(required, Exercise DB PK)", "routine_id:integer|null(optional, owner routine)", "workout_date:date(required)", "workout_time:integer>=0(required)", "set_count:integer>=0(required)", "repetition:integer>=0(required)", "memo:string(optional)"],
+      "body_fields": ["workout_id:integer(required, Exercise DB PK; exercise_id legacy alias accepted)", "routine_id:integer|null(optional, owner routine)", "workout_date:date(required)", "workout_time:integer|null(optional)", "memo:string(optional, never used by AI)", "sets:[{set_order,weight_kg?,repetition?,duration_seconds?,rpe?,is_warmup?}](required, min 1)", "set_count/repetition(optional legacy summary)"],
       "response_data": "WorkoutLog"
     },
     {
@@ -440,7 +447,7 @@
       "method": "PATCH",
       "url": "/api/v1/workout-logs/{log_id}/",
       "auth": "required owner",
-      "body_fields": ["WorkoutLog input fields, all optional"],
+      "body_fields": ["workout_date:date(optional)", "workout_time:integer|null(optional)", "memo:string(optional)", "sets:WorkoutLogSet[](optional, replaces all sets)"],
       "response_data": "WorkoutLog"
     },
     {
@@ -546,6 +553,96 @@
       "auth": "optional",
       "body_fields": [],
       "response_data": "PublicProfile"
+    },
+    {
+      "id": 58,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/evaluations/",
+      "auth": "required",
+      "body_fields": ["target_date:date(required; legacy date also accepted)"],
+      "response_data": "DietFeedback"
+    },
+    {
+      "id": 59,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/",
+      "auth": "required",
+      "body_fields": ["scope:meal|day|remaining(optional, default meal)", "message:string(optional)", "target_date:date(required)", "food_source:all|my_fridge|free(optional, default all)", "meal_count:integer(1..6, day only, default 3)", "meal_order:integer(optional)", "meal_label:string(optional)", "meal_type:breakfast|lunch|dinner|snack(optional, legacy)", "exclude_food_ids:integer[](optional)", "preference:string(optional, legacy)"],
+      "response_data": "AIRecommendation diet result"
+    },
+    {
+      "id": 60,
+      "group": "AI Workout",
+      "method": "POST",
+      "url": "/api/v1/ai/workout/recommendations/",
+      "auth": "required",
+      "body_fields": ["message:string(optional)", "target_body_part:string(optional)", "available_time:integer(required)", "exercise_source:all|my_exercises(optional, default all)", "weekly_frequency:integer(optional, legacy)", "preference:string(optional, legacy)"],
+      "response_data": "AIRecommendation workout result"
+    },
+    {
+      "id": 61,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/recommendations/{recommendation_id}/save-meal/",
+      "auth": "required owner",
+      "body_fields": ["meal_type:breakfast|lunch|dinner|snack(required)", "intake_date:date(required)"],
+      "response_data": "Meal"
+    },
+    {
+      "id": 62,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/save/",
+      "auth": "required owner",
+      "body_fields": ["save_target:meals|saved_meal|meal_plan|both(optional, default saved_meal)", "title:string(optional)", "description:string(optional)", "name:string(optional, legacy title alias)"],
+      "response_data": "{save_target,meal_ids?,saved_meal_id?,meal_plan_id?}"
+    },
+    {
+      "id": 63,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/recommendations/{recommendation_id}/save-routine/",
+      "auth": "required owner",
+      "body_fields": ["name:string(required)", "description:string(optional)"],
+      "response_data": "WorkoutRoutine"
+    },
+    {
+      "id": 64,
+      "group": "AI Diet",
+      "method": "GET",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/",
+      "auth": "required owner",
+      "body_fields": [],
+      "response_data": "{recommendation_id,recommendation_scope,food_source,target_date,parent_recommendation_id,is_saved,content,created_at,updated_at}"
+    },
+    {
+      "id": 65,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/replace/",
+      "auth": "required owner",
+      "body_fields": ["meal_order:integer(required)", "replace_food_id:integer(DB mode, one of two)", "replace_ai_food_key:string(free mode, one of two)", "message:string(required)"],
+      "response_data": "new AIRecommendation with recommendation_scope=replacement"
+    },
+    {
+      "id": 66,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/reroll/",
+      "auth": "required owner",
+      "body_fields": ["message:string(required)"],
+      "response_data": "new AIRecommendation with recommendation_scope=reroll"
+    },
+    {
+      "id": 67,
+      "group": "AI Workout",
+      "method": "POST",
+      "url": "/api/v1/ai/workout/progression/",
+      "auth": "required",
+      "body_fields": ["workout_id:integer(required, Exercise DB PK)", "target_date:date(optional, default today)", "goal:string(optional, defaults to profile workout_goal)", "message:string(optional)"],
+      "response_data": "{workout_id,workout_name,target_date,decision,recommendation,recovery_summary,history_summary,reason,safety_note}"
     }
   ],
   "planned_endpoints": [
@@ -588,60 +685,6 @@
       "expected_response_data": "null (예상)"
     },
     {
-      "id": "P04",
-      "group": "AI Diet",
-      "method": "POST",
-      "url": "/api/v1/ai/diet/recommendations/",
-      "auth": "required",
-      "purpose": "프로필과 식단 목표를 바탕으로 AI 식단을 추천한다.",
-      "status": "미구현",
-      "body_example": {
-        "target_date": "2026-06-20",
-        "meal_count": 4,
-        "exclude_food_ids": [5, 8],
-        "preference": "고단백, 조리 간단한 식단"
-      },
-      "expected_response_data": {
-        "id": 1,
-        "recommendation_type": "diet",
-        "title": "하루 식단 추천",
-        "content": {},
-        "reason": "추천 근거",
-        "created_at": "datetime"
-      }
-    },
-    {
-      "id": "P05",
-      "group": "AI Diet",
-      "method": "POST",
-      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/save/",
-      "auth": "required owner",
-      "purpose": "AI 식단 추천 결과를 재사용 가능한 SavedMeal로 저장하거나 적용한다.",
-      "status": "미구현",
-      "body_example": null,
-      "expected_response_data": "SavedMeal (예상)"
-    },
-    {
-      "id": "P06",
-      "group": "AI Diet",
-      "method": "POST",
-      "url": "/api/v1/ai/diet/evaluations/",
-      "auth": "required",
-      "purpose": "지정한 날짜의 식단을 AI로 평가하고 피드백을 생성한다.",
-      "status": "미구현",
-      "body_example": {
-        "date": "2026-06-20"
-      },
-      "expected_response_data": {
-        "id": 1,
-        "feedback_date": "2026-06-20",
-        "score": 85,
-        "summary": "평가 요약",
-        "feedback": "상세 피드백",
-        "created_at": "datetime"
-      }
-    },
-    {
       "id": "P07",
       "group": "Diet Feedback",
       "method": "GET",
@@ -652,28 +695,6 @@
       "query": ["date=YYYY-MM-DD", "start_date=YYYY-MM-DD", "end_date=YYYY-MM-DD"],
       "body_example": null,
       "expected_response_data": "DietFeedback[] (예상)"
-    },
-    {
-      "id": "P08",
-      "group": "AI Workout",
-      "method": "POST",
-      "url": "/api/v1/ai/workout/recommendations/",
-      "auth": "required",
-      "purpose": "프로필과 운동 조건을 바탕으로 AI 운동 루틴을 추천한다.",
-      "status": "미구현",
-      "body_example": {
-        "available_time": 60,
-        "weekly_frequency": 4,
-        "preference": "헬스장 근력 운동"
-      },
-      "expected_response_data": {
-        "id": 2,
-        "recommendation_type": "workout",
-        "title": "주간 운동 추천",
-        "content": {},
-        "reason": "추천 근거",
-        "created_at": "datetime"
-      }
     },
     {
       "id": "P09",
