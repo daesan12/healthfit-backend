@@ -1,7 +1,43 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import serializers
 
 from .models import Food, Meal, MealItem, SavedMeal, SavedMealItem
+
+
+MEAL_TYPE_CHOICES = ['breakfast', 'lunch', 'dinner', 'snack']
+
+
+def get_accessible_food(user, food_id, error_field='food_id'):
+    food = Food.objects.filter(pk=food_id).filter(
+        Q(user__isnull=True) | Q(user=user)
+    ).first()
+    if food is None:
+        raise serializers.ValidationError(
+            {error_field: [f'조회 가능한 음식이 아닙니다: {food_id}']}
+        )
+    return food
+
+
+def calculate_nutrition(value, amount):
+    return round((value or 0) * amount / 100, 2)
+
+
+def meal_item_nutrition(*, amount, food=None, food_snapshot=None):
+    nutrition = (
+        {
+            'calories': food.calories,
+            'carbohydrate': food.carbohydrate,
+            'protein': food.protein,
+            'fat': food.fat,
+        }
+        if food is not None
+        else food_snapshot.nutrition_per_100g
+    )
+    return {
+        field: calculate_nutrition(nutrition.get(field), amount)
+        for field in ['calories', 'carbohydrate', 'protein', 'fat']
+    }
 
 
 class FoodSerializer(serializers.ModelSerializer):
@@ -69,8 +105,77 @@ class MealItemSerializer(serializers.ModelSerializer):
         return obj.food_snapshot.ai_food_key if obj.food_snapshot_id else None
 
 
+class MealItemCreateSerializer(MealItemInputSerializer):
+    def validate_food_id(self, value):
+        get_accessible_food(self.context['request'].user, value)
+        return value
+
+    @transaction.atomic
+    def create(self, validated_data):
+        meal = self.context['meal']
+        food = get_accessible_food(
+            self.context['request'].user,
+            validated_data['food_id'],
+        )
+        item = MealItem.objects.create(
+            meal=meal,
+            food=food,
+            amount=validated_data['amount'],
+            **meal_item_nutrition(amount=validated_data['amount'], food=food),
+        )
+        meal.recalculate_totals()
+        return item
+
+
+class MealItemUpdateSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('섭취량은 0보다 커야 합니다.')
+        return value
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        amount = validated_data['amount']
+        instance.amount = amount
+        for field, value in meal_item_nutrition(
+            amount=amount,
+            food=instance.food,
+            food_snapshot=instance.food_snapshot,
+        ).items():
+            setattr(instance, field, value)
+        instance.save(update_fields=[
+            'amount', 'calories', 'carbohydrate', 'protein', 'fat',
+        ])
+        instance.meal.recalculate_totals()
+        return instance
+
+
+class MealFilterSerializer(serializers.Serializer):
+    date = serializers.DateField(required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    meal_type = serializers.ChoiceField(choices=MEAL_TYPE_CHOICES, required=False)
+    meal_label = serializers.CharField(required=False, allow_blank=False)
+
+    def validate(self, attrs):
+        if attrs.get('start_date') and attrs.get('end_date'):
+            if attrs['start_date'] > attrs['end_date']:
+                raise serializers.ValidationError(
+                    {'date_range': ['시작일은 종료일보다 늦을 수 없습니다.']}
+                )
+        return attrs
+
+
 class MealSerializer(serializers.ModelSerializer):
-    items = MealItemInputSerializer(many=True, write_only=True, required=False)
+    meal_type = serializers.ChoiceField(choices=MEAL_TYPE_CHOICES)
+    items = MealItemInputSerializer(
+        many=True,
+        write_only=True,
+        required=False,
+        allow_empty=False,
+    )
     meal_items = MealItemSerializer(source='items', many=True, read_only=True)
 
     class Meta:
@@ -98,14 +203,18 @@ class MealSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.instance is None and not attrs.get('items'):
             raise serializers.ValidationError({'items': ['식단 항목을 1개 이상 입력해주세요.']})
+        if 'items' in attrs and not attrs['items']:
+            raise serializers.ValidationError({'items': ['식단 항목을 1개 이상 입력해주세요.']})
         return attrs
 
+    @transaction.atomic
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         meal = Meal.objects.create(**validated_data)
         self._replace_items(meal, items_data)
         return meal
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items', None)
 
@@ -125,31 +234,16 @@ class MealSerializer(serializers.ModelSerializer):
         request = self.context['request']
 
         for item_data in items_data:
-            food = self._get_food(item_data['food_id'], request.user)
+            food = get_accessible_food(request.user, item_data['food_id'], 'items')
             amount = item_data['amount']
             MealItem.objects.create(
                 meal=meal,
                 food=food,
                 amount=amount,
-                calories=self._calculate(food.calories, amount),
-                carbohydrate=self._calculate(food.carbohydrate, amount),
-                protein=self._calculate(food.protein, amount),
-                fat=self._calculate(food.fat, amount),
+                **meal_item_nutrition(amount=amount, food=food),
             )
 
         meal.recalculate_totals()
-
-    def _get_food(self, food_id, user):
-        try:
-            return Food.objects.get(id=food_id, user__isnull=True)
-        except Food.DoesNotExist:
-            try:
-                return Food.objects.get(id=food_id, user=user)
-            except Food.DoesNotExist as exc:
-                raise serializers.ValidationError({'items': [f'조회 가능한 음식이 아닙니다: {food_id}']}) from exc
-
-    def _calculate(self, value, amount):
-        return round((value or 0) * amount / 100, 2)
 
 
 class SavedMealItemSerializer(serializers.ModelSerializer):
@@ -253,17 +347,9 @@ class SavedMealSerializer(serializers.ModelSerializer):
         saved_meal.recalculate_totals()
 
     def _get_food(self, food_id, user):
-        try:
-            return Food.objects.get(id=food_id, user__isnull=True)
-        except Food.DoesNotExist:
-            try:
-                return Food.objects.get(id=food_id, user=user)
-            except Food.DoesNotExist as exc:
-                raise serializers.ValidationError(
-                    {'items': [f'조회 가능한 음식이 아닙니다: {food_id}']}
-                ) from exc
+        return get_accessible_food(user, food_id, 'items')
 
 
 class SavedMealCreateMealSerializer(serializers.Serializer):
-    meal_type = serializers.CharField(max_length=20)
+    meal_type = serializers.ChoiceField(choices=MEAL_TYPE_CHOICES)
     intake_date = serializers.DateField()

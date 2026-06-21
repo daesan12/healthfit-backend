@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Food, Meal, SavedMeal
+from .models import Food, Meal, MealItem, SavedMeal
 
 
 class DietPaginationTests(APITestCase):
@@ -110,3 +110,124 @@ class DietPaginationTests(APITestCase):
         self.assert_paginated(response)
         self.assertEqual(response.data['data']['count'], 23)
         self.assertEqual(len(response.data['data']['results']), 10)
+
+
+class MealLoggingApiTests(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='meal-user', email='meal@example.com', password='password123!'
+        )
+        self.other_user = User.objects.create_user(
+            username='other-meal-user', email='other-meal@example.com', password='password123!'
+        )
+        self.rice = Food.objects.create(
+            name='밥', category='곡류', calories=150,
+            carbohydrate=32, protein=3, fat=1,
+        )
+        self.chicken = Food.objects.create(
+            name='닭가슴살', category='육류', calories=165,
+            carbohydrate=0, protein=31, fat=3.6,
+        )
+        self.other_food = Food.objects.create(
+            user=self.other_user,
+            name='다른 사용자 음식', category='기타', calories=200,
+            carbohydrate=20, protein=20, fat=5,
+        )
+        self.client.force_authenticate(self.user)
+
+    def meal_payload(self):
+        return {
+            'meal_type': 'breakfast',
+            'intake_date': '2026-06-21',
+            'items': [
+                {'food_id': self.rice.id, 'amount': 100},
+                {'food_id': self.chicken.id, 'amount': 150},
+            ],
+        }
+
+    def test_create_meal_calculates_items_and_totals_and_filters_by_date(self):
+        created = self.client.post('/api/v1/meals/', self.meal_payload(), format='json')
+
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(created.data['data']['total_calories'], 397.5)
+        self.assertEqual(created.data['data']['total_protein'], 49.5)
+        self.assertEqual(len(created.data['data']['meal_items']), 2)
+
+        listed = self.client.get('/api/v1/meals/?date=2026-06-21&meal_type=breakfast')
+        self.assertEqual(listed.status_code, status.HTTP_200_OK)
+        self.assertEqual(listed.data['data']['count'], 1)
+        self.assertEqual(
+            listed.data['data']['results'][0]['meal_items'][0]['food_name'],
+            '밥',
+        )
+
+    def test_invalid_food_rolls_back_entire_meal_and_invalid_input_is_rejected(self):
+        payload = self.meal_payload()
+        payload['items'].append({'food_id': self.other_food.id, 'amount': 100})
+
+        inaccessible = self.client.post('/api/v1/meals/', payload, format='json')
+        invalid_type = self.client.post(
+            '/api/v1/meals/',
+            {**self.meal_payload(), 'meal_type': 'custom'},
+            format='json',
+        )
+        empty_items = self.client.post(
+            '/api/v1/meals/',
+            {**self.meal_payload(), 'items': []},
+            format='json',
+        )
+        invalid_date = self.client.get('/api/v1/meals/?date=not-a-date')
+
+        for response in [inaccessible, invalid_type, empty_items, invalid_date]:
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertFalse(response.data['success'])
+        self.assertEqual(Meal.objects.count(), 0)
+        self.assertEqual(MealItem.objects.count(), 0)
+
+    def test_meal_item_add_update_delete_recalculates_totals(self):
+        created = self.client.post('/api/v1/meals/', self.meal_payload(), format='json')
+        meal_id = created.data['data']['id']
+
+        added = self.client.post(
+            f'/api/v1/meals/{meal_id}/items/',
+            {'food_id': self.chicken.id, 'amount': 100},
+            format='json',
+        )
+        self.assertEqual(added.status_code, status.HTTP_201_CREATED)
+        item_id = added.data['data']['id']
+        self.assertEqual(Meal.objects.get(pk=meal_id).total_calories, 562.5)
+
+        updated = self.client.patch(
+            f'/api/v1/meal-items/{item_id}/',
+            {'amount': 200},
+            format='json',
+        )
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated.data['data']['calories'], 330)
+        self.assertEqual(Meal.objects.get(pk=meal_id).total_calories, 727.5)
+
+        deleted = self.client.delete(f'/api/v1/meal-items/{item_id}/')
+        self.assertEqual(deleted.status_code, status.HTTP_200_OK)
+        self.assertEqual(Meal.objects.get(pk=meal_id).total_calories, 397.5)
+
+    def test_meal_item_is_owner_only_and_last_item_cannot_be_deleted(self):
+        created = self.client.post(
+            '/api/v1/meals/',
+            {
+                'meal_type': 'snack',
+                'intake_date': '2026-06-21',
+                'items': [{'food_id': self.rice.id, 'amount': 100}],
+            },
+            format='json',
+        )
+        item_id = created.data['data']['meal_items'][0]['id']
+
+        last_item = self.client.delete(f'/api/v1/meal-items/{item_id}/')
+        self.assertEqual(last_item.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.client.force_authenticate(self.other_user)
+        other_user = self.client.patch(
+            f'/api/v1/meal-items/{item_id}/', {'amount': 50}, format='json'
+        )
+        self.assertEqual(other_user.status_code, status.HTTP_404_NOT_FOUND)

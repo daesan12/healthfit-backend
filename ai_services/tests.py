@@ -198,7 +198,7 @@ class AIApiTests(APITestCase):
             total_fat=20,
         )
         mock_generate.return_value = {
-            'score': 82,
+            'score': 99,
             'summary': '단백질 섭취가 좋습니다.',
             'good_points': ['단백질 섭취가 적절합니다.'],
             'improvement_points': ['채소를 추가하세요.'],
@@ -213,11 +213,77 @@ class AIApiTests(APITestCase):
             )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['data']['score'], 82)
+        self.assertEqual(response.data['data']['score'], 29)
         self.assertEqual(response.data['data']['strengths'], ['단백질 섭취가 적절합니다.'])
         self.assertEqual(response.data['data']['recommended_actions'], ['샐러드를 곁들이세요.'])
         self.assertEqual(response.data['data']['result_data']['total_calories'], 600)
+        self.assertEqual(response.data['data']['target']['recommended_calories'], 2205)
+        score_detail = response.data['data']['score_detail']
+        self.assertEqual(
+            response.data['data']['score'],
+            score_detail['calorie_score']
+            + score_detail['macro_score']
+            + score_detail['meal_record_score'],
+        )
+        self.assertNotIn('"score":78', mock_generate.call_args.args[0])
         self.assertEqual(DietFeedback.objects.filter(user=self.user).count(), 1)
+
+    def test_diet_feedback_history_filters_by_date_and_owner(self):
+        DietFeedback.objects.create(
+            user=self.user,
+            target_date='2026-06-20',
+            score=80,
+            summary='좋습니다.',
+            recommendation='유지하세요.',
+            result_data={'score_detail': {'reasons': ['좋습니다.']}},
+        )
+        DietFeedback.objects.create(
+            user=self.user,
+            target_date='2026-06-21',
+            score=70,
+            summary='조절하세요.',
+            recommendation='단백질을 추가하세요.',
+        )
+        DietFeedback.objects.create(
+            user=self.other_user,
+            target_date='2026-06-20',
+            score=100,
+            summary='다른 사용자',
+            recommendation='보이지 않아야 합니다.',
+        )
+
+        response = self.client.get(
+            '/api/v1/diet-feedbacks/?start_date=2026-06-20&end_date=2026-06-20'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['data']), 1)
+        self.assertEqual(response.data['data'][0]['score'], 80)
+        self.assertEqual(
+            response.data['data'][0]['score_detail']['reasons'],
+            ['좋습니다.'],
+        )
+
+    @patch('ai_services.services.recommendation_service.GMSClient.generate_json')
+    def test_diet_evaluation_requires_profile_and_meals(self, mock_generate):
+        with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
+            no_meals = self.client.post(
+                '/api/v1/ai/diet/evaluations/',
+                {'date': '2026-06-30'},
+                format='json',
+            )
+            self.client.force_authenticate(self.other_user)
+            no_profile = self.client.post(
+                '/api/v1/ai/diet/evaluations/',
+                {'date': '2026-06-30'},
+                format='json',
+            )
+
+        self.assertEqual(no_meals.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('meals', no_meals.data['errors'])
+        self.assertEqual(no_profile.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('profile', no_profile.data['errors'])
+        mock_generate.assert_not_called()
 
     @patch('ai_services.services.recommendation_service.GMSClient.generate_json')
     def test_diet_recommendation_recalculates_nutrition_and_saves_result(self, mock_generate):

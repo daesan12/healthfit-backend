@@ -132,6 +132,31 @@ class WorkoutLogSetSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class WorkoutLogFilterSerializer(serializers.Serializer):
+    date = serializers.DateField(required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    routine_id = serializers.IntegerField(required=False, min_value=1)
+    workout_id = serializers.IntegerField(required=False, min_value=1)
+    exercise_id = serializers.IntegerField(required=False, min_value=1)
+
+    def validate(self, attrs):
+        if attrs.get('start_date') and attrs.get('end_date'):
+            if attrs['start_date'] > attrs['end_date']:
+                raise serializers.ValidationError(
+                    {'date_range': ['시작일은 종료일보다 늦을 수 없습니다.']}
+                )
+        if (
+            attrs.get('workout_id')
+            and attrs.get('exercise_id')
+            and attrs['workout_id'] != attrs['exercise_id']
+        ):
+            raise serializers.ValidationError(
+                {'workout_id': ['workout_id와 exercise_id가 서로 다릅니다.']}
+            )
+        return attrs
+
+
 class WorkoutLogSerializer(serializers.ModelSerializer):
     log_id = serializers.IntegerField(source='id', read_only=True)
     exercise_id = serializers.IntegerField(required=False)

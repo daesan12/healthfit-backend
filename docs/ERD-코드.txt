@@ -189,7 +189,6 @@ Table progress_records {
   user_id integer [not null] // 사용자 ID, users 테이블 참조
   record_date date [not null] // 진행 현황 기록 날짜
   weight float // 해당 날짜의 몸무게
-  total_burned_calories integer // 해당 날짜 총 소모 칼로리
   meal_score integer // 해당 날짜 식단 평가 점수
   workout_count integer // 해당 날짜 운동 횟수
   created_at timestamp // 진행 현황 기록 생성일

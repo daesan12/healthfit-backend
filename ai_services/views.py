@@ -11,11 +11,12 @@ from diets.serializers import MealSerializer, SavedMealSerializer
 from workouts.models import WorkoutRoutine
 from workouts.serializers import RoutineItemSerializer, WorkoutRoutineSerializer
 
-from .models import AIChat, AIRecommendation
+from .models import AIChat, AIRecommendation, DietFeedback
 from .serializers import (
     AIChatRequestSerializer,
     AIChatSerializer,
     DietEvaluationRequestSerializer,
+    DietFeedbackFilterSerializer,
     DietFeedbackSerializer,
     DietRecommendationRequestSerializer,
     ReplaceDietItemRequestSerializer,
@@ -132,6 +133,30 @@ class DietEvaluationView(AIAPIView):
         except (GMSConfigurationError, GMSAPIError, GMSResponseError, AIServiceError) as exc:
             return self.service_error_response(exc)
         return success_response('AI 식단 평가가 완료되었습니다.', DietFeedbackSerializer(feedback).data)
+
+
+class DietFeedbackListView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        filter_serializer = DietFeedbackFilterSerializer(data=request.query_params)
+        if not filter_serializer.is_valid():
+            return error_response('식단 평가 기록 조회에 실패했습니다.', filter_serializer.errors)
+
+        filters = filter_serializer.validated_data
+        feedbacks = DietFeedback.objects.filter(user=request.user)
+        if filters.get('date'):
+            feedbacks = feedbacks.filter(target_date=filters['date'])
+        if filters.get('start_date'):
+            feedbacks = feedbacks.filter(target_date__gte=filters['start_date'])
+        if filters.get('end_date'):
+            feedbacks = feedbacks.filter(target_date__lte=filters['end_date'])
+
+        data = DietFeedbackSerializer(
+            feedbacks.order_by('-target_date', '-created_at', '-id'),
+            many=True,
+        ).data
+        return success_response('식단 평가 기록 조회 성공', data)
 
 
 class DietRecommendationView(AIAPIView):

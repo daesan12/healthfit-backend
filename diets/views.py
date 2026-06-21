@@ -12,6 +12,10 @@ from config.pagination import paginate_data
 from .models import Food, Meal, MealItem, SavedMeal
 from .serializers import (
     FoodSerializer,
+    MealFilterSerializer,
+    MealItemCreateSerializer,
+    MealItemSerializer,
+    MealItemUpdateSerializer,
     MealSerializer,
     SavedMealCreateMealSerializer,
     SavedMealSerializer,
@@ -123,27 +127,24 @@ class MealListCreateView(CommonResponseAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        meals = Meal.objects.filter(user=request.user)
+        filter_serializer = MealFilterSerializer(data=request.query_params)
+        if not filter_serializer.is_valid():
+            return error_response('식단 기록 목록 조회에 실패했습니다.', filter_serializer.errors)
 
-        date = request.query_params.get('date')
-        if date:
-            meals = meals.filter(intake_date=date)
-
-        start_date = request.query_params.get('start_date')
-        if start_date:
-            meals = meals.filter(intake_date__gte=start_date)
-
-        end_date = request.query_params.get('end_date')
-        if end_date:
-            meals = meals.filter(intake_date__lte=end_date)
-
-        meal_type = request.query_params.get('meal_type')
-        if meal_type:
-            meals = meals.filter(meal_type=meal_type)
-
-        meal_label = request.query_params.get('meal_label')
-        if meal_label:
-            meals = meals.filter(meal_label__icontains=meal_label)
+        filters = filter_serializer.validated_data
+        meals = Meal.objects.filter(user=request.user).prefetch_related(
+            'items__food', 'items__food_snapshot'
+        )
+        if filters.get('date'):
+            meals = meals.filter(intake_date=filters['date'])
+        if filters.get('start_date'):
+            meals = meals.filter(intake_date__gte=filters['start_date'])
+        if filters.get('end_date'):
+            meals = meals.filter(intake_date__lte=filters['end_date'])
+        if filters.get('meal_type'):
+            meals = meals.filter(meal_type=filters['meal_type'])
+        if filters.get('meal_label'):
+            meals = meals.filter(meal_label__icontains=filters['meal_label'])
 
         data = paginate_data(
             request,
@@ -307,6 +308,78 @@ class MealDetailView(CommonResponseAPIView):
 
         meal.delete()
         return success_response('식단 기록이 삭제되었습니다.', None)
+
+
+class MealItemCreateView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, meal_id):
+        try:
+            meal = Meal.objects.get(pk=meal_id, user=request.user)
+        except Meal.DoesNotExist:
+            return error_response(
+                '식단 항목 추가에 실패했습니다.',
+                {'meal_id': ['항목을 추가할 수 있는 내 식단 기록이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MealItemCreateSerializer(
+            data=request.data,
+            context={'request': request, 'meal': meal},
+        )
+        if not serializer.is_valid():
+            return error_response('식단 항목 추가에 실패했습니다.', serializer.errors)
+
+        item = serializer.save()
+        return success_response(
+            '식단 항목이 추가되었습니다.',
+            MealItemSerializer(item).data,
+            status.HTTP_201_CREATED,
+        )
+
+
+class MealItemDetailView(CommonResponseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_item(self, request, meal_item_id, message):
+        try:
+            return MealItem.objects.select_related(
+                'meal', 'food', 'food_snapshot'
+            ).get(pk=meal_item_id, meal__user=request.user)
+        except MealItem.DoesNotExist:
+            return error_response(
+                message,
+                {'meal_item_id': ['수정 또는 삭제 가능한 내 식단 항목이 아닙니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+
+    def patch(self, request, meal_item_id):
+        item = self.get_item(request, meal_item_id, '식단 항목 수정에 실패했습니다.')
+        if not isinstance(item, MealItem):
+            return item
+
+        serializer = MealItemUpdateSerializer(item, data=request.data)
+        if not serializer.is_valid():
+            return error_response('식단 항목 수정에 실패했습니다.', serializer.errors)
+
+        item = serializer.save()
+        return success_response('식단 항목이 수정되었습니다.', MealItemSerializer(item).data)
+
+    def delete(self, request, meal_item_id):
+        item = self.get_item(request, meal_item_id, '식단 항목 삭제에 실패했습니다.')
+        if not isinstance(item, MealItem):
+            return item
+        if item.meal.items.count() <= 1:
+            return error_response(
+                '식단 항목 삭제에 실패했습니다.',
+                {'items': ['식단에는 항목이 1개 이상 필요합니다.']},
+            )
+
+        meal = item.meal
+        with transaction.atomic():
+            item.delete()
+            meal.recalculate_totals()
+        return success_response('식단 항목이 삭제되었습니다.', None)
 
 
 class SavedMealListCreateView(CommonResponseAPIView):

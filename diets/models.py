@@ -54,10 +54,10 @@ class Meal(models.Model):
 
     def recalculate_totals(self):
         items = self.items.all()
-        self.total_calories = sum(item.calories for item in items)
-        self.total_carbohydrate = sum(item.carbohydrate for item in items)
-        self.total_protein = sum(item.protein for item in items)
-        self.total_fat = sum(item.fat for item in items)
+        self.total_calories = round(sum(item.calories for item in items), 2)
+        self.total_carbohydrate = round(sum(item.carbohydrate for item in items), 2)
+        self.total_protein = round(sum(item.protein for item in items), 2)
+        self.total_fat = round(sum(item.fat for item in items), 2)
         self.save(update_fields=[
             'total_calories',
             'total_carbohydrate',

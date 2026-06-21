@@ -226,3 +226,17 @@ class WorkoutPaginationTests(APITestCase):
         self.assertEqual(data['count'], 10)
         self.assertEqual(len(data['results']), 6)
         self.assertTrue(all(item['workout_id'] == self.exercise.id for item in data['results']))
+
+    def test_workout_log_filters_reject_invalid_values(self):
+        responses = [
+            self.client.get('/api/v1/workout-logs/?date=not-a-date'),
+            self.client.get('/api/v1/workout-logs/?routine_id=abc'),
+            self.client.get(
+                '/api/v1/workout-logs/?start_date=2026-06-22&end_date=2026-06-21'
+            ),
+        ]
+
+        for response in responses:
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertFalse(response.data['success'])
+            self.assertEqual(response.data['message'], '운동 기록 목록 조회에 실패했습니다.')

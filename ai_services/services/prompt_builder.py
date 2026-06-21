@@ -30,10 +30,11 @@ def build_diet_evaluation_prompt(context):
         f'{JSON_ONLY_RULES}\n'
         f'{HEALTHFIT_PT_COACH_TONE}\n'
         '당신은 사용자의 하루 식단을 평가하는 영양 코치입니다. '
-        '의학적 진단은 하지 말고 제공된 목표량과 실제 섭취량만 비교하세요.\n'
+        '의학적 진단은 하지 말고 제공된 목표량, 실제 섭취량, 백엔드가 계산한 점수와 이유만 설명하세요. '
+        '숫자 합계나 점수를 새로 계산하거나 변경하지 마세요.\n'
         f'평가 데이터: {dump(context)}\n'
         '다음 구조로 반환하세요: '
-        '{"score":78,"strengths":["장점"],"improvements":["개선점"],'
+        '{"strengths":["장점"],"improvements":["개선점"],'
         '"recommended_actions":["실천 가능한 행동"],"feedback":"전체 피드백"}'
     )
 

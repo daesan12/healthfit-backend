@@ -94,6 +94,68 @@ def meal_totals(meals):
     }
 
 
+def target_accuracy_score(actual, target, max_points):
+    if target is None or target <= 0:
+        return 0
+    accuracy = max(0, 1 - abs(actual - target) / target)
+    return max(0, min(max_points, round(max_points * accuracy)))
+
+
+def build_diet_score(totals, targets, meals):
+    calorie_score = target_accuracy_score(
+        totals['total_calories'], targets['target_calories'], 40
+    )
+    macro_fields = [
+        ('carbohydrate', '탄수화물', 'total_carbohydrate', 'target_carbohydrate'),
+        ('protein', '단백질', 'total_protein', 'target_protein'),
+        ('fat', '지방', 'total_fat', 'target_fat'),
+    ]
+    macro_scores = {
+        key: target_accuracy_score(totals[total_key], targets[target_key], 15)
+        for key, _, total_key, target_key in macro_fields
+    }
+    macro_score = sum(macro_scores.values())
+    meal_record_score = min(len(meals), 3) * 5
+
+    reasons = []
+    calorie_target = targets['target_calories']
+    calorie_total = totals['total_calories']
+    calorie_gap_ratio = abs(calorie_total - calorie_target) / calorie_target
+    if calorie_gap_ratio <= 0.1:
+        reasons.append('총 섭취 칼로리가 권장 범위에 가깝습니다.')
+    elif calorie_total < calorie_target:
+        reasons.append('총 섭취 칼로리가 권장량보다 부족합니다.')
+    else:
+        reasons.append('총 섭취 칼로리가 권장량보다 많습니다.')
+
+    for _, label, total_key, target_key in macro_fields:
+        actual = totals[total_key]
+        target = targets[target_key]
+        gap_ratio = abs(actual - target) / target
+        if gap_ratio <= 0.15:
+            reasons.append(f'{label} 섭취량이 권장 범위에 가깝습니다.')
+        elif actual < target:
+            reasons.append(f'{label} 섭취량이 권장량보다 부족합니다.')
+        else:
+            reasons.append(f'{label} 섭취량이 권장량보다 많습니다.')
+
+    if len(meals) >= 3:
+        reasons.append('하루 식사 기록이 3회 이상 등록되어 있습니다.')
+    else:
+        reasons.append('하루 식사 기록을 3회 이상 남기면 더 정확하게 평가할 수 있습니다.')
+
+    return (
+        calorie_score + macro_score + meal_record_score,
+        {
+            'calorie_score': calorie_score,
+            'macro_score': macro_score,
+            'macro_scores': macro_scores,
+            'meal_record_score': meal_record_score,
+            'reasons': reasons,
+        },
+    )
+
+
 def remaining_nutrition(targets, totals):
     pairs = {
         'remaining_calories': ('target_calories', 'total_calories'),
@@ -195,10 +257,23 @@ def evaluate_diet(user, target_date):
 
     targets = calorie_targets(profile)
     totals = meal_totals(meals)
-    result_data = {**targets, **totals}
+    score, score_detail = build_diet_score(totals, targets, meals)
+    target = {
+        'recommended_calories': targets['target_calories'],
+        'recommended_carbohydrate': targets['target_carbohydrate'],
+        'recommended_protein': targets['target_protein'],
+        'recommended_fat': targets['target_fat'],
+    }
+    result_data = {
+        **targets,
+        **totals,
+        'target': target,
+        'score_detail': score_detail,
+    }
     context = {
         'target_date': target_date.isoformat(),
         'profile': profile_context(user),
+        'score': score,
         **result_data,
         'meals': [
             {
@@ -230,7 +305,7 @@ def evaluate_diet(user, target_date):
         user=user,
         target_date=target_date,
         result_data=result_data,
-        score=validated['score'],
+        score=score,
         summary=validated['feedback'],
         good_points=validated['strengths'],
         improvement_points=validated['improvements'],

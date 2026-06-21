@@ -9,6 +9,7 @@ from .models import Exercise, RoutineItem, WorkoutLog, WorkoutRoutine
 from .serializers import (
     ExerciseSerializer,
     RoutineItemSerializer,
+    WorkoutLogFilterSerializer,
     WorkoutLogSerializer,
     WorkoutRoutineSerializer,
 )
@@ -270,27 +271,25 @@ class WorkoutLogListCreateView(CommonResponseAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        filter_serializer = WorkoutLogFilterSerializer(data=request.query_params)
+        if not filter_serializer.is_valid():
+            return error_response('운동 기록 목록 조회에 실패했습니다.', filter_serializer.errors)
+
+        filters = filter_serializer.validated_data
         logs = WorkoutLog.objects.filter(user=request.user).select_related(
             'exercise', 'routine'
         ).prefetch_related('sets')
 
-        date = request.query_params.get('date')
-        if date:
-            logs = logs.filter(workout_date=date)
+        if filters.get('date'):
+            logs = logs.filter(workout_date=filters['date'])
+        if filters.get('start_date'):
+            logs = logs.filter(workout_date__gte=filters['start_date'])
+        if filters.get('end_date'):
+            logs = logs.filter(workout_date__lte=filters['end_date'])
+        if filters.get('routine_id'):
+            logs = logs.filter(routine_id=filters['routine_id'])
 
-        start_date = request.query_params.get('start_date')
-        if start_date:
-            logs = logs.filter(workout_date__gte=start_date)
-
-        end_date = request.query_params.get('end_date')
-        if end_date:
-            logs = logs.filter(workout_date__lte=end_date)
-
-        routine_id = request.query_params.get('routine_id')
-        if routine_id:
-            logs = logs.filter(routine_id=routine_id)
-
-        workout_id = request.query_params.get('workout_id') or request.query_params.get('exercise_id')
+        workout_id = filters.get('workout_id') or filters.get('exercise_id')
         if workout_id:
             logs = logs.filter(exercise_id=workout_id)
 

@@ -316,30 +316,43 @@ class ProgressView(CommonResponseAPIView):
         if errors:
             return error_response('진행 현황 조회에 실패했습니다.', errors)
 
+        from ai_services.models import DietFeedback
         from diets.models import Meal
         from workouts.models import WorkoutLog
 
-        body_records = BodyRecord.objects.filter(
+        body_records = list(BodyRecord.objects.filter(
             user=request.user,
             record_date__range=(start_date, end_date),
-        ).select_related('user__profile').order_by('record_date', 'id')
-        meals = Meal.objects.filter(
+        ).select_related('user__profile').order_by('record_date', 'id'))
+        meals = list(Meal.objects.filter(
             user=request.user,
             intake_date__range=(start_date, end_date),
-        )
-        workout_logs = WorkoutLog.objects.filter(
+        ))
+        diet_feedbacks = list(DietFeedback.objects.filter(
+            user=request.user,
+            target_date__range=(start_date, end_date),
+        ).order_by('target_date', '-created_at', '-id'))
+        workout_logs = list(WorkoutLog.objects.filter(
             user=request.user,
             workout_date__range=(start_date, end_date),
-        )
+        ))
 
         profile = getattr(request.user, 'profile', None)
+        body_summary = self.body_summary(body_records)
+        meal_summary = self.meal_summary(meals, diet_feedbacks)
+        workout_summary = self.workout_summary(workout_logs)
         data = {
             'start_date': start_date,
             'end_date': end_date,
             'profile': ProfileSerializer(profile).data if profile else None,
-            'body_summary': self.body_summary(body_records),
-            'meal_summary': self.meal_summary(meals),
-            'workout_summary': self.workout_summary(workout_logs),
+            'body_summary': body_summary,
+            'meal_summary': meal_summary,
+            'workout_summary': workout_summary,
+            'chart_data': self.chart_data(
+                body_records,
+                meal_summary['daily'],
+                workout_summary['daily'],
+            ),
         }
         return success_response('진행 현황 조회 성공', data)
 
@@ -348,6 +361,11 @@ class ProgressView(CommonResponseAPIView):
         weighted_records = [record for record in records if record.weight is not None]
         starting_weight = weighted_records[0].weight if weighted_records else None
         latest_weight = weighted_records[-1].weight if weighted_records else None
+        average_weight = (
+            round(sum(record.weight for record in weighted_records) / len(weighted_records), 2)
+            if weighted_records
+            else None
+        )
         weight_change = None
         if starting_weight is not None and latest_weight is not None:
             weight_change = round(latest_weight - starting_weight, 2)
@@ -356,17 +374,19 @@ class ProgressView(CommonResponseAPIView):
         return {
             'starting_weight': starting_weight,
             'latest_weight': latest_weight,
+            'average_weight': average_weight,
             'weight_change': weight_change,
             'recent_records': BodyRecordSerializer(recent, many=True).data,
         }
 
-    def meal_summary(self, meals):
+    def meal_summary(self, meals, feedbacks):
         daily = defaultdict(lambda: {
             'meal_count': 0,
             'total_calories': 0,
             'total_carbohydrate': 0,
             'total_protein': 0,
             'total_fat': 0,
+            'meal_score': None,
         })
         totals = {
             'meal_count': 0,
@@ -389,9 +409,33 @@ class ProgressView(CommonResponseAPIView):
             for field in ['total_calories', 'total_carbohydrate', 'total_protein', 'total_fat']:
                 values[field] = round(values[field], 2)
 
+        latest_scores = {}
+        for feedback in feedbacks:
+            latest_scores.setdefault(feedback.target_date.isoformat(), feedback.score)
+        for date, score in latest_scores.items():
+            daily[date]['meal_score'] = score
+
+        daily_with_meals = [values for values in daily.values() if values['meal_count']]
+        average_intake_calories = (
+            round(
+                sum(values['total_calories'] for values in daily_with_meals)
+                / len(daily_with_meals),
+                2,
+            )
+            if daily_with_meals
+            else None
+        )
+        average_meal_score = (
+            round(sum(latest_scores.values()) / len(latest_scores), 2)
+            if latest_scores
+            else None
+        )
+
         return {
             **totals,
-            'meal_score': None,
+            'average_intake_calories': average_intake_calories,
+            'meal_score': average_meal_score,
+            'average_meal_score': average_meal_score,
             'daily': [{'date': date, **daily[date]} for date in sorted(daily)],
         }
 
@@ -412,3 +456,20 @@ class ProgressView(CommonResponseAPIView):
             'total_workout_time': total_workout_time,
             'daily': [{'date': date, **daily[date]} for date in sorted(daily)],
         }
+
+    def chart_data(self, body_records, meal_daily, workout_daily):
+        chart = defaultdict(lambda: {
+            'weight': None,
+            'total_calories': 0,
+            'meal_score': None,
+            'workout_count': 0,
+        })
+        for record in body_records:
+            if record.weight is not None:
+                chart[record.record_date.isoformat()]['weight'] = record.weight
+        for values in meal_daily:
+            chart[values['date']]['total_calories'] = values['total_calories']
+            chart[values['date']]['meal_score'] = values['meal_score']
+        for values in workout_daily:
+            chart[values['date']]['workout_count'] = values['workout_count']
+        return [{'date': date, **chart[date]} for date in sorted(chart)]

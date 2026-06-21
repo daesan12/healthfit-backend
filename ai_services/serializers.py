@@ -161,7 +161,7 @@ class StringListField(serializers.ListField):
 
 
 class DietEvaluationAIResultSerializer(serializers.Serializer):
-    score = serializers.IntegerField(min_value=0, max_value=100)
+    score = serializers.IntegerField(min_value=0, max_value=100, required=False)
     strengths = StringListField(required=False)
     improvements = StringListField(required=False)
     recommended_actions = StringListField(required=False)
@@ -294,6 +294,8 @@ class DietFeedbackSerializer(serializers.ModelSerializer):
     improvements = serializers.JSONField(source='improvement_points', read_only=True)
     recommended_actions = serializers.SerializerMethodField()
     feedback = serializers.CharField(source='summary', read_only=True)
+    target = serializers.SerializerMethodField()
+    score_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = DietFeedback
@@ -307,6 +309,8 @@ class DietFeedbackSerializer(serializers.ModelSerializer):
             'total_carbohydrate',
             'total_protein',
             'total_fat',
+            'target',
+            'score_detail',
             'strengths',
             'improvements',
             'recommended_actions',
@@ -335,3 +339,28 @@ class DietFeedbackSerializer(serializers.ModelSerializer):
     def get_recommended_actions(self, obj):
         actions = obj.result_data.get('recommended_actions')
         return actions if isinstance(actions, list) else ([obj.recommendation] if obj.recommendation else [])
+
+    def get_target(self, obj):
+        return obj.result_data.get('target', {
+            'recommended_calories': obj.result_data.get('target_calories'),
+            'recommended_carbohydrate': obj.result_data.get('target_carbohydrate'),
+            'recommended_protein': obj.result_data.get('target_protein'),
+            'recommended_fat': obj.result_data.get('target_fat'),
+        })
+
+    def get_score_detail(self, obj):
+        return obj.result_data.get('score_detail', {})
+
+
+class DietFeedbackFilterSerializer(serializers.Serializer):
+    date = serializers.DateField(required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+
+    def validate(self, attrs):
+        if attrs.get('start_date') and attrs.get('end_date'):
+            if attrs['start_date'] > attrs['end_date']:
+                raise serializers.ValidationError(
+                    {'date_range': ['시작일은 종료일보다 늦을 수 없습니다.']}
+                )
+        return attrs

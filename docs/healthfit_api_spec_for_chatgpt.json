@@ -4,9 +4,9 @@
   "status": "current backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 72,
-  "planned_endpoint_count": 4,
-  "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
+  "endpoint_count": 76,
+  "planned_endpoint_count": 0,
+  "planned_notice": "현재 문서에 등록된 planned endpoint는 없다.",
   "authentication": {
     "type": "JWT Bearer",
     "header": "Authorization: Bearer {access_token}",
@@ -45,7 +45,8 @@
     "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
     "food_source는 all, my_fridge, free이며 free 추천도 FoodSnapshot을 통해 저장할 수 있다.",
     "exercise_source는 all 또는 my_exercises이다.",
-    "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다."
+    "MealItem 개별 추가/수정/삭제와 DietFeedback 날짜 조회가 구현되어 있다.",
+    "운동 API는 difficulty, MET, estimated_calories, calories_burned, total_burned_calories를 사용하지 않는다."
   ],
   "schemas": {
     "User": ["id", "username", "email"],
@@ -67,10 +68,10 @@
     "SharedWorkoutRoutineSnapshot": ["id", "name", "description", "exercise_count", "items"],
     "ViewerSaveStatus": ["saved", "saved_meal_id", "workout_routine_id"],
     "Pagination": ["count", "page", "page_size", "total_pages", "next", "previous", "has_next", "has_previous", "results"],
-    "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
+    "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary", "chart_data"],
     "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
     "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
-    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "strengths", "improvements", "recommended_actions", "feedback"],
+    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "target", "score_detail", "strengths", "improvements", "recommended_actions", "feedback"],
     "AIChat": ["id", "question", "answer", "created_at"]
   },
   "endpoints": [
@@ -574,7 +575,8 @@
       "url": "/api/v1/ai/diet/evaluations/",
       "auth": "required",
       "body_fields": ["target_date:date(required; legacy date also accepted)"],
-      "response_data": "DietFeedback"
+      "response_data": "DietFeedback",
+      "behavior": "백엔드가 Meal 합계, 권장량, 0~100 점수와 score_detail을 결정하고 GMS는 PT 코치 자연어 피드백만 생성한다."
     },
     {
       "id": 59,
@@ -706,58 +708,46 @@
       "body_fields": ["question:string(required, max 2000)"],
       "response_data": "AIChat",
       "behavior": "최근 내 채팅 최대 5개와 원본 질문을 AI guardrail에 전달한다. 허용 시 PT 코치 답변을 생성하고, 차단 시 고정 안전 문구를 answer로 저장한다."
-    }
-  ],
-  "planned_endpoints": [
+    },
     {
-      "id": "P01",
+      "id": 73,
       "group": "MealItem",
       "method": "POST",
       "url": "/api/v1/meals/{meal_id}/items/",
       "auth": "required owner",
-      "purpose": "기존 식단 기록에 음식 항목 하나를 추가하고 식단 영양 합계를 다시 계산한다.",
-      "status": "미구현",
-      "body_example": {
-        "food_id": 3,
-        "amount": 200
-      },
-      "expected_response_data": "MealItem (예상)"
+      "body_fields": ["food_id:integer(required, accessible Food PK)", "amount:float>0(required, grams)"],
+      "response_data": "MealItem",
+      "behavior": "항목을 추가한 뒤 Meal 영양 합계를 다시 계산한다."
     },
     {
-      "id": "P02",
+      "id": 74,
       "group": "MealItem",
       "method": "PATCH",
       "url": "/api/v1/meal-items/{meal_item_id}/",
       "auth": "required owner",
-      "purpose": "내 식단의 음식 항목 수량을 수정하고 식단 영양 합계를 다시 계산한다.",
-      "status": "미구현",
-      "body_example": {
-        "amount": 180
-      },
-      "expected_response_data": "MealItem (예상)"
+      "body_fields": ["amount:float>0(required, grams)"],
+      "response_data": "MealItem",
+      "behavior": "섭취량과 영양값을 수정한 뒤 Meal 영양 합계를 다시 계산한다."
     },
     {
-      "id": "P03",
+      "id": 75,
       "group": "MealItem",
       "method": "DELETE",
       "url": "/api/v1/meal-items/{meal_item_id}/",
       "auth": "required owner",
-      "purpose": "내 식단의 음식 항목 하나를 삭제하고 식단 영양 합계를 다시 계산한다.",
-      "status": "미구현",
-      "body_example": null,
-      "expected_response_data": "null (예상)"
+      "response_data": "null",
+      "behavior": "마지막 항목은 삭제할 수 없으며 삭제 후 Meal 영양 합계를 다시 계산한다."
     },
     {
-      "id": "P07",
+      "id": 76,
       "group": "Diet Feedback",
       "method": "GET",
       "url": "/api/v1/diet-feedbacks/",
-      "auth": "required",
-      "purpose": "로그인 사용자의 AI 식단 평가 기록을 조회한다.",
-      "status": "미구현",
-      "query": ["date=YYYY-MM-DD", "start_date=YYYY-MM-DD", "end_date=YYYY-MM-DD"],
-      "body_example": null,
-      "expected_response_data": "DietFeedback[] (예상)"
+      "auth": "required owner",
+      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)"],
+      "response_data": "DietFeedback[]",
+      "behavior": "현재 사용자의 저장된 식단 평가만 최신 날짜순으로 반환하며 GMS를 호출하지 않는다."
     }
-  ]
+  ],
+  "planned_endpoints": []
 }
