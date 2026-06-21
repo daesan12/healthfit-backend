@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from config.pagination import PaginationError, paginate_data
+
 from .models import BodyRecord, Profile
 from .serializers import BodyRecordSerializer, LoginSerializer, LogoutSerializer, ProfileSerializer, SignupSerializer
 
@@ -45,6 +47,9 @@ def user_data(user):
 
 class CommonResponseAPIView(APIView):
     def handle_exception(self, exc):
+        if isinstance(exc, PaginationError):
+            return error_response('페이지 조회에 실패했습니다.', exc.errors)
+
         if isinstance(exc, (AuthenticationFailed, NotAuthenticated)):
             return error_response(
                 '인증이 필요합니다.',
@@ -235,8 +240,12 @@ class BodyRecordListCreateView(CommonResponseAPIView):
                 )
             records = records.filter(record_date__lte=parsed_end)
 
-        serializer = BodyRecordSerializer(records.order_by('-record_date', '-id'), many=True)
-        return success_response('신체 기록 목록 조회 성공', serializer.data)
+        data = paginate_data(
+            request,
+            records.order_by('-record_date', '-id'),
+            BodyRecordSerializer,
+        )
+        return success_response('신체 기록 목록 조회 성공', data)
 
     def post(self, request):
         serializer = BodyRecordSerializer(data=request.data)

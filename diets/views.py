@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, calculate_recommended_calories, error_response, success_response
+from config.pagination import paginate_data
 
 from .models import Food, Meal, MealItem, SavedMeal
 from .serializers import (
@@ -24,15 +25,24 @@ class FoodListCreateView(CommonResponseAPIView):
         return [AllowAny()]
 
     def get(self, request):
-        foods = Food.objects.all()
+        source = request.query_params.get('source')
+        if source is None and request.query_params.get('mine') == 'true':
+            source = 'my'
+        source = source or 'all'
+        if source not in ['all', 'default', 'my']:
+            return error_response(
+                '음식 목록 조회에 실패했습니다.',
+                {'source': ['source는 all, default, my 중 하나여야 합니다.']},
+            )
 
-        if request.user.is_authenticated:
-            if request.query_params.get('mine') == 'true':
-                foods = foods.filter(user=request.user)
-            else:
-                foods = foods.filter(Q(user__isnull=True) | Q(user=request.user))
+        if source == 'my':
+            foods = Food.objects.filter(user=request.user) if request.user.is_authenticated else Food.objects.none()
+        elif source == 'default':
+            foods = Food.objects.filter(user__isnull=True)
+        elif request.user.is_authenticated:
+            foods = Food.objects.filter(Q(user__isnull=True) | Q(user=request.user))
         else:
-            foods = foods.filter(user__isnull=True)
+            foods = Food.objects.filter(user__isnull=True)
 
         search = request.query_params.get('search')
         if search:
@@ -42,8 +52,8 @@ class FoodListCreateView(CommonResponseAPIView):
         if category:
             foods = foods.filter(category=category)
 
-        serializer = FoodSerializer(foods.order_by('id'), many=True)
-        return success_response('음식 목록 조회 성공', serializer.data)
+        data = paginate_data(request, foods.order_by('id'), FoodSerializer)
+        return success_response('음식 목록 조회 성공', data)
 
     def post(self, request):
         serializer = FoodSerializer(data=request.data)
@@ -131,8 +141,16 @@ class MealListCreateView(CommonResponseAPIView):
         if meal_type:
             meals = meals.filter(meal_type=meal_type)
 
-        serializer = MealSerializer(meals.order_by('-intake_date', '-id'), many=True)
-        return success_response('식단 기록 목록 조회 성공', serializer.data)
+        meal_label = request.query_params.get('meal_label')
+        if meal_label:
+            meals = meals.filter(meal_label__icontains=meal_label)
+
+        data = paginate_data(
+            request,
+            meals.order_by('-intake_date', '-id'),
+            MealSerializer,
+        )
+        return success_response('식단 기록 목록 조회 성공', data)
 
     def post(self, request):
         serializer = MealSerializer(data=request.data, context={'request': request})
@@ -296,8 +314,17 @@ class SavedMealListCreateView(CommonResponseAPIView):
 
     def get(self, request):
         saved_meals = SavedMeal.objects.filter(user=request.user).prefetch_related('items__food')
-        serializer = SavedMealSerializer(saved_meals.order_by('-id'), many=True)
-        return success_response('저장 식단 목록 조회 성공', serializer.data)
+        search = request.query_params.get('search')
+        if search:
+            saved_meals = saved_meals.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        data = paginate_data(
+            request,
+            saved_meals.order_by('-created_at', '-id'),
+            SavedMealSerializer,
+        )
+        return success_response('저장 식단 목록 조회 성공', data)
 
     def post(self, request):
         serializer = SavedMealSerializer(data=request.data, context={'request': request})

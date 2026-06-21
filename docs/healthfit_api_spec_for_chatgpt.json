@@ -4,7 +4,7 @@
   "status": "current backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 69,
+  "endpoint_count": 70,
   "planned_endpoint_count": 6,
   "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
   "authentication": {
@@ -33,7 +33,9 @@
     "식단 대시보드는 /meals/dashboard/이다.",
     "RoutineItem은 exercise_id, 새 WorkoutLog와 AI progression은 workout_id를 사용하며 모두 숫자 Exercise DB PK이다. WorkoutLog의 기존 exercise_id도 호환된다.",
     "Exercise 응답의 문자열 exercise_id는 외부 ExerciseDB 또는 custom 식별자이다.",
-    "Post 목록 data는 {count,page,page_size,results} 객체이다.",
+    "목록 pagination data는 {count,page,page_size,total_pages,next,previous,has_next,has_previous,results} 객체이다.",
+    "pagination page 기본값은 1, page_size 기본값은 20이고 최대 100이다. 필터를 먼저 적용한 후 페이지를 나눈다.",
+    "무한 스크롤은 page=1부터 시작해 next 또는 다음 page 번호를 요청하며 백엔드는 전체 목록을 한 번에 반환하지 않는다.",
     "diet 게시글은 작성자 본인의 shared_saved_meal_id, workout 게시글은 작성자 본인의 shared_workout_routine_id를 선택적으로 첨부할 수 있다.",
     "Post의 공유 대상은 snapshot으로 응답되며 원본 수정/삭제 후에도 유지된다. 인증 사용자는 save-shared-meal 또는 save-shared-routine으로 자신의 계정에 복사할 수 있다.",
     "오류 응답은 Axios의 error.response.data에서 읽는다.",
@@ -62,6 +64,7 @@
     "SharedSavedMealSnapshot": ["id", "name", "description", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "items"],
     "SharedWorkoutRoutineSnapshot": ["id", "name", "description", "exercise_count", "items"],
     "ViewerSaveStatus": ["saved", "saved_meal_id", "workout_routine_id"],
+    "Pagination": ["count", "page", "page_size", "total_pages", "next", "previous", "has_next", "has_previous", "results"],
     "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
     "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
     "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
@@ -134,8 +137,8 @@
       "method": "GET",
       "url": "/api/v1/body-records/",
       "auth": "required",
-      "query": ["start_date:date(optional)", "end_date:date(optional)"],
-      "response_data": "BodyRecord[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "start_date:date(optional)", "end_date:date(optional)"],
+      "response_data": "Pagination<BodyRecord>"
     },
     {
       "id": 9,
@@ -169,8 +172,8 @@
       "method": "GET",
       "url": "/api/v1/foods/",
       "auth": "optional",
-      "query": ["search:string(optional)", "category:string(optional)", "mine:true(optional, auth required)"],
-      "response_data": "Food[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "category:string(optional)", "source:all|default|my(optional, default all)", "mine:true(optional, legacy alias for source=my)"],
+      "response_data": "Pagination<Food>"
     },
     {
       "id": 13,
@@ -212,8 +215,8 @@
       "method": "GET",
       "url": "/api/v1/meals/",
       "auth": "required",
-      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "meal_type:breakfast|lunch|dinner|snack(optional)"],
-      "response_data": "Meal[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "meal_type:string(optional)", "meal_label:string contains(optional)"],
+      "response_data": "Pagination<Meal>"
     },
     {
       "id": 18,
@@ -264,7 +267,8 @@
       "method": "GET",
       "url": "/api/v1/saved-meals/",
       "auth": "required",
-      "response_data": "SavedMeal[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string in name|description(optional)"],
+      "response_data": "Pagination<SavedMeal>"
     },
     {
       "id": 24,
@@ -315,8 +319,8 @@
       "method": "GET",
       "url": "/api/v1/exercises/",
       "auth": "optional",
-      "query": ["search:string(optional)", "body_part:string(optional)", "equipment:string(optional)", "target_muscle:string(optional)"],
-      "response_data": "Exercise[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "body_part:string(optional)", "equipment:string(optional)", "target_muscle:string(optional)", "source:all|default|my(optional, default all)"],
+      "response_data": "Pagination<Exercise>"
     },
     {
       "id": 30,
@@ -358,7 +362,8 @@
       "method": "GET",
       "url": "/api/v1/workout-routines/",
       "auth": "required",
-      "response_data": "WorkoutRoutine[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string in name|description(optional)"],
+      "response_data": "Pagination<WorkoutRoutine>"
     },
     {
       "id": 35,
@@ -426,8 +431,8 @@
       "method": "GET",
       "url": "/api/v1/workout-logs/",
       "auth": "required",
-      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "workout_id:integer(optional)", "routine_id:integer(optional)", "exercise_id:integer(optional, legacy alias)"],
-      "response_data": "WorkoutLog[]"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "workout_id:integer(optional)", "routine_id:integer(optional)", "exercise_id:integer(optional, legacy alias)"],
+      "response_data": "Pagination<WorkoutLog>"
     },
     {
       "id": 43,
@@ -478,8 +483,8 @@
       "method": "GET",
       "url": "/api/v1/posts/",
       "auth": "optional",
-      "query": ["search:string(optional)", "author:string(optional)", "category:diet|workout|free(optional)", "page:integer>=1(optional, default 1)"],
-      "response_data": "{count:integer,page:integer,page_size:10,results:Post[]}"
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "author:string(optional)", "category:diet|workout|free(optional)"],
+      "response_data": "Pagination<Post>"
     },
     {
       "id": 49,
@@ -668,6 +673,16 @@
       "body_fields": [],
       "response_data": "{routine_id:integer,name:string,already_saved:boolean}",
       "behavior": "게시글의 공유 루틴 snapshot으로 요청 사용자 소유 WorkoutRoutine과 RoutineItem을 복사한다. 같은 사용자의 중복 요청은 기존 복사본을 반환한다."
+    },
+    {
+      "id": 70,
+      "group": "Comment",
+      "method": "GET",
+      "url": "/api/v1/posts/{post_id}/comments/",
+      "auth": "none",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)"],
+      "response_data": "Pagination<Comment>",
+      "behavior": "댓글은 created_at, id 오름차순이다. 기존 Post 상세의 comments 배열은 하위 호환을 위해 유지한다."
     }
   ],
   "planned_endpoints": [

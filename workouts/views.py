@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, error_response, success_response
+from config.pagination import paginate_data
 
 from .models import Exercise, RoutineItem, WorkoutLog, WorkoutRoutine
 from .serializers import (
@@ -26,7 +27,22 @@ class ExerciseListView(CommonResponseAPIView):
         return [AllowAny()]
 
     def get(self, request):
-        exercises = visible_exercises(request.user)
+        source = request.query_params.get('source', 'all')
+        if source not in ['all', 'default', 'my']:
+            return error_response(
+                '운동 목록 조회에 실패했습니다.',
+                {'source': ['source는 all, default, my 중 하나여야 합니다.']},
+            )
+        if source == 'my':
+            exercises = (
+                Exercise.objects.filter(user=request.user)
+                if request.user.is_authenticated
+                else Exercise.objects.none()
+            )
+        elif source == 'default':
+            exercises = Exercise.objects.filter(user__isnull=True)
+        else:
+            exercises = visible_exercises(request.user)
 
         search = request.query_params.get('search')
         if search:
@@ -44,8 +60,8 @@ class ExerciseListView(CommonResponseAPIView):
         if target_muscle:
             exercises = exercises.filter(target_muscles__icontains=target_muscle)
 
-        serializer = ExerciseSerializer(exercises.order_by('id'), many=True)
-        return success_response('운동 목록 조회 성공', serializer.data)
+        data = paginate_data(request, exercises.order_by('id'), ExerciseSerializer)
+        return success_response('운동 목록 조회 성공', data)
 
     def post(self, request):
         serializer = ExerciseSerializer(data=request.data)
@@ -114,8 +130,17 @@ class WorkoutRoutineListCreateView(CommonResponseAPIView):
 
     def get(self, request):
         routines = WorkoutRoutine.objects.filter(user=request.user).prefetch_related('items__exercise')
-        serializer = WorkoutRoutineSerializer(routines.order_by('-id'), many=True)
-        return success_response('운동 루틴 목록 조회 성공', serializer.data)
+        search = request.query_params.get('search')
+        if search:
+            routines = routines.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        data = paginate_data(
+            request,
+            routines.order_by('-created_at', '-id'),
+            WorkoutRoutineSerializer,
+        )
+        return success_response('운동 루틴 목록 조회 성공', data)
 
     def post(self, request):
         serializer = WorkoutRoutineSerializer(data=request.data)
@@ -269,8 +294,12 @@ class WorkoutLogListCreateView(CommonResponseAPIView):
         if workout_id:
             logs = logs.filter(exercise_id=workout_id)
 
-        serializer = WorkoutLogSerializer(logs.order_by('-workout_date', '-id'), many=True)
-        return success_response('운동 기록 목록 조회 성공', serializer.data)
+        data = paginate_data(
+            request,
+            logs.order_by('-workout_date', '-id'),
+            WorkoutLogSerializer,
+        )
+        return success_response('운동 기록 목록 조회 성공', data)
 
     def post(self, request):
         serializer = WorkoutLogSerializer(data=request.data, context={'request': request})

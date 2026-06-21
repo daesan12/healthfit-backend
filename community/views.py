@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, error_response, success_response
+from config.pagination import paginate_data
 
 from .models import Comment, Like, Post, SharedPostSave
 from .serializers import (
@@ -85,31 +86,12 @@ class PostListCreateView(CommonResponseAPIView):
         if category:
             posts = posts.filter(category=category)
 
-        page_text = request.query_params.get('page', '1')
-        try:
-            page = int(page_text)
-            if page < 1:
-                raise ValueError
-        except ValueError:
-            return error_response(
-                '게시글 목록 조회에 실패했습니다.',
-                {'page': ['페이지 번호는 1 이상의 정수여야 합니다.']},
-            )
-
-        count = posts.count()
-        page_size = 10
-        offset = (page - 1) * page_size
-        serializer = PostSerializer(
-            posts[offset:offset + page_size],
-            many=True,
+        data = paginate_data(
+            request,
+            posts,
+            PostSerializer,
             context={'request': request},
         )
-        data = {
-            'count': count,
-            'page': page,
-            'page_size': page_size,
-            'results': serializer.data,
-        }
         return success_response('게시글 목록 조회 성공', data)
 
     def post(self, request):
@@ -176,7 +158,23 @@ class PostDetailView(CommonResponseAPIView):
 
 
 class CommentCreateView(CommonResponseAPIView):
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    def get(self, request, post_id):
+        if not Post.objects.filter(pk=post_id).exists():
+            return error_response(
+                '댓글 목록 조회에 실패했습니다.',
+                {'post_id': ['댓글을 조회할 게시글이 없습니다.']},
+                status.HTTP_404_NOT_FOUND,
+            )
+        comments = Comment.objects.filter(post_id=post_id).select_related('user').order_by(
+            'created_at', 'id'
+        )
+        data = paginate_data(request, comments, CommentSerializer)
+        return success_response('댓글 목록 조회 성공', data)
 
     def post(self, request, post_id):
         try:

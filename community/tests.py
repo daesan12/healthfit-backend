@@ -6,7 +6,7 @@ from accounts.models import Profile
 from diets.models import Food, FoodSnapshot, SavedMeal, SavedMealItem
 from workouts.models import Exercise, RoutineItem, WorkoutRoutine
 
-from .models import Post, SharedPostSave
+from .models import Comment, Post, SharedPostSave
 
 
 class PublicProfileAPITests(APITestCase):
@@ -342,3 +342,59 @@ class CommunitySharingAPITests(APITestCase):
         self.assertEqual(routine_response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(meal_response.data['success'])
         self.assertFalse(routine_response.data['success'])
+
+
+class CommunityPaginationTests(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='community-pagination',
+            email='community-pagination@example.com',
+            password='password123!',
+        )
+        Post.objects.bulk_create([
+            Post(
+                user=self.user,
+                title=f'운동 공유 {index:02d}',
+                content='가슴 운동 기록',
+                category='workout',
+            )
+            for index in range(23)
+        ])
+        Post.objects.create(
+            user=self.user,
+            title='식단 공유',
+            content='오늘의 식단',
+            category='diet',
+        )
+
+    def test_posts_paginate_after_search_and_category_filters(self):
+        response = self.client.get(
+            '/api/v1/posts/?search=운동&category=workout&page=2&page_size=10'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data['data']
+        self.assertEqual(data['count'], 23)
+        self.assertEqual(data['page'], 2)
+        self.assertEqual(data['page_size'], 10)
+        self.assertEqual(data['total_pages'], 3)
+        self.assertEqual(len(data['results']), 10)
+        self.assertTrue(data['has_next'])
+        self.assertTrue(data['has_previous'])
+        self.assertTrue(data['next'].startswith('/api/v1/posts/'))
+
+    def test_comments_have_separate_paginated_get_without_changing_post_detail(self):
+        post = Post.objects.filter(category='workout').first()
+        Comment.objects.bulk_create([
+            Comment(user=self.user, post=post, content=f'댓글 {index}')
+            for index in range(25)
+        ])
+
+        comments = self.client.get(f'/api/v1/posts/{post.id}/comments/?page_size=10')
+        detail = self.client.get(f'/api/v1/posts/{post.id}/')
+
+        self.assertEqual(comments.status_code, status.HTTP_200_OK)
+        self.assertEqual(comments.data['data']['count'], 25)
+        self.assertEqual(len(comments.data['data']['results']), 10)
+        self.assertEqual(len(detail.data['data']['comments']), 25)
