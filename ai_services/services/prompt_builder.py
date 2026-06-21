@@ -1,5 +1,11 @@
 import json
 
+from ai_services.prompts import (
+    HEALTHFIT_DIET_RECOMMENDATION_PROMPT,
+    HEALTHFIT_PT_COACH_TONE,
+    HEALTHFIT_WORKOUT_RECOMMENDATION_PROMPT,
+)
+
 
 JSON_ONLY_RULES = (
     '반드시 유효한 JSON 객체 하나만 반환하세요. '
@@ -22,6 +28,7 @@ def dump(data):
 def build_diet_evaluation_prompt(context):
     return (
         f'{JSON_ONLY_RULES}\n'
+        f'{HEALTHFIT_PT_COACH_TONE}\n'
         '당신은 사용자의 하루 식단을 평가하는 영양 코치입니다. '
         '의학적 진단은 하지 말고 제공된 목표량과 실제 섭취량만 비교하세요.\n'
         f'평가 데이터: {dump(context)}\n'
@@ -31,13 +38,15 @@ def build_diet_evaluation_prompt(context):
     )
 
 
-def build_diet_condition_prompt(request_data, profile):
+def build_diet_condition_prompt(request_data, profile, guardrail=None):
     return (
         f'{JSON_ONLY_RULES}\n'
         '사용자의 식단 추천 요청을 데이터 조회 조건으로만 분석하세요. '
         'SQL이나 Python 코드를 만들지 마세요.\n'
         f'사용자 요청: {dump(request_data)}\n'
+        f'가드레일 요약: {dump(guardrail or {})}\n'
         f'프로필: {dump(profile)}\n'
+        '가드레일 relevant_summary가 있으면 그 내용을 자유 텍스트 조건의 기준으로 사용하고, 사용자 요청의 무관한 잡담은 무시하세요. '
         '사용자가 명시한 내용만 추출하고 언급하지 않은 값은 null 또는 빈 배열로 두세요. '
         '특히 "빼줘", "제외", "먹지 않아", "알레르기" 뒤의 음식은 excluded_foods에 넣으세요.\n'
         '다음 구조로 반환하세요: '
@@ -103,6 +112,8 @@ def build_diet_recommendation_prompt(context, candidates=None, free=False, corre
     correction_text = f'이전 응답 오류: {correction}\n' if correction else ''
     return (
         f'{JSON_ONLY_RULES}\n'
+        f'{HEALTHFIT_DIET_RECOMMENDATION_PROMPT}\n'
+        f'{HEALTHFIT_PT_COACH_TONE}\n'
         f'{correction_text}'
         f'사용자의 목표에 맞으면서 실제 사람이 한 끼로 바로 먹을 수 있는 식단을 추천하세요.{rules}\n'
         '남은 하루 영양량 전체를 한 끼에 채우려고 하지 마세요. '
@@ -136,7 +147,8 @@ def build_diet_replacement_prompt(context, candidates=None, free=False):
     )
     rules = '' if free else CANDIDATE_ID_RULES
     return (
-        f'{JSON_ONLY_RULES}\n{rules}\n'
+        f'{JSON_ONLY_RULES}\n{HEALTHFIT_DIET_RECOMMENDATION_PROMPT}\n'
+        f'{HEALTHFIT_PT_COACH_TONE}\n{rules}\n'
         '지정된 음식 하나를 비슷한 역할과 현실적인 양의 다른 음식 하나로 교체하세요. '
         '사용자의 추가 제외/선호 조건을 반드시 반영하세요.\n'
         f'교체 컨텍스트: {dump(context)}\n'
@@ -145,13 +157,15 @@ def build_diet_replacement_prompt(context, candidates=None, free=False):
     )
 
 
-def build_workout_condition_prompt(request_data, profile):
+def build_workout_condition_prompt(request_data, profile, guardrail=None):
     return (
         f'{JSON_ONLY_RULES}\n'
         '사용자의 운동 추천 요청을 운동 후보 조회 조건으로만 분석하세요. '
         'SQL이나 Python 코드를 만들지 마세요.\n'
         f'사용자 요청: {dump(request_data)}\n'
+        f'가드레일 요약: {dump(guardrail or {})}\n'
         f'프로필: {dump(profile)}\n'
+        '가드레일 relevant_summary가 있으면 그 내용을 자유 텍스트 조건의 기준으로 사용하고, 사용자 요청의 무관한 잡담은 무시하세요. '
         '다음 구조로 반환하세요: '
         '{"intent":"workout_recommendation","goal":"muscle_gain",'
         '"conditions":{"body_part_keywords":["가슴"],"equipment_keywords":[],'
@@ -162,6 +176,8 @@ def build_workout_condition_prompt(request_data, profile):
 def build_workout_recommendation_prompt(context, candidates):
     return (
         f'{JSON_ONLY_RULES}\n'
+        f'{HEALTHFIT_WORKOUT_RECOMMENDATION_PROMPT}\n'
+        f'{HEALTHFIT_PT_COACH_TONE}\n'
         f'사용자의 목표와 운동 경험에 맞는 운동 루틴을 추천하세요. {CANDIDATE_ID_RULES}\n'
         f'추천 컨텍스트: {dump(context)}\n'
         f'운동 후보: {dump(candidates)}\n'
@@ -176,6 +192,8 @@ def build_workout_recommendation_prompt(context, candidates):
 def build_workout_progression_prompt(payload):
     return (
         f'{JSON_ONLY_RULES}\n'
+        f'{HEALTHFIT_WORKOUT_RECOMMENDATION_PROMPT}\n'
+        f'{HEALTHFIT_PT_COACH_TONE}\n'
         '당신은 피트니스 기록 앱의 근력 운동 점진적 과부하 보조 코치입니다. '
         '백엔드가 계산한 최근 세트 기록, 관련 근육 회복 상태, 사용자 목표와 경험만 사용하세요. '
         '사용자 memo는 제공되지 않으며 추측해서도 안 됩니다. 운동 기록이나 운동 ID를 만들지 마세요. '

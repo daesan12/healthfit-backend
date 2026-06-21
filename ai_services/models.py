@@ -73,3 +73,20 @@ class DietFeedback(models.Model):
 
     def __str__(self):
         return f'{self.user.username} {self.target_date} diet feedback'
+
+
+class AIChat(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='ai_chats',
+    )
+    question = models.TextField()
+    answer = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return f'{self.user.username}: {self.question[:30]}'

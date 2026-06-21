@@ -4,8 +4,8 @@
   "status": "current backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 70,
-  "planned_endpoint_count": 6,
+  "endpoint_count": 72,
+  "planned_endpoint_count": 4,
   "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
   "authentication": {
     "type": "JWT Bearer",
@@ -40,6 +40,8 @@
     "Post의 공유 대상은 snapshot으로 응답되며 원본 수정/삭제 후에도 유지된다. 인증 사용자는 save-shared-meal 또는 save-shared-routine으로 자신의 계정에 복사할 수 있다.",
     "오류 응답은 Axios의 error.response.data에서 읽는다.",
     "AI API는 JWT 인증과 backend/.env의 GMS_KEY가 필요하다.",
+    "AI chat POST와 식단/운동 추천의 message 또는 preference는 AI JSON guardrail을 먼저 통과하며 기존 추천 request field는 변경되지 않았다.",
+    "AI chat은 POST {question:string}으로 생성하고 GET은 내 기록을 Pagination<AIChat>으로 반환한다.",
     "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
     "food_source는 all, my_fridge, free이며 free 추천도 FoodSnapshot을 통해 저장할 수 있다.",
     "exercise_source는 all 또는 my_exercises이다.",
@@ -68,7 +70,8 @@
     "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
     "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
     "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
-    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "strengths", "improvements", "recommended_actions", "feedback"]
+    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "strengths", "improvements", "recommended_actions", "feedback"],
+    "AIChat": ["id", "question", "answer", "created_at"]
   },
   "endpoints": [
     {
@@ -683,6 +686,26 @@
       "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)"],
       "response_data": "Pagination<Comment>",
       "behavior": "댓글은 created_at, id 오름차순이다. 기존 Post 상세의 comments 배열은 하위 호환을 위해 유지한다."
+    },
+    {
+      "id": 71,
+      "group": "AI Chat",
+      "method": "GET",
+      "url": "/api/v1/ai/chats/",
+      "auth": "required owner",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)"],
+      "response_data": "Pagination<AIChat>",
+      "behavior": "현재 사용자의 채팅만 최신순으로 반환하며 GMS를 호출하지 않는다."
+    },
+    {
+      "id": 72,
+      "group": "AI Chat",
+      "method": "POST",
+      "url": "/api/v1/ai/chats/",
+      "auth": "required",
+      "body_fields": ["question:string(required, max 2000)"],
+      "response_data": "AIChat",
+      "behavior": "최근 내 채팅 최대 5개와 원본 질문을 AI guardrail에 전달한다. 허용 시 PT 코치 답변을 생성하고, 차단 시 고정 안전 문구를 answer로 저장한다."
     }
   ],
   "planned_endpoints": [
@@ -735,35 +758,6 @@
       "query": ["date=YYYY-MM-DD", "start_date=YYYY-MM-DD", "end_date=YYYY-MM-DD"],
       "body_example": null,
       "expected_response_data": "DietFeedback[] (예상)"
-    },
-    {
-      "id": "P09",
-      "group": "AI Chat",
-      "method": "POST",
-      "url": "/api/v1/ai/chats/",
-      "auth": "required",
-      "purpose": "운동과 식단에 관한 질문을 보내고 AI 답변을 저장한다.",
-      "status": "미구현",
-      "body_example": {
-        "question": "운동 전에는 어떤 음식을 먹는 게 좋아?"
-      },
-      "expected_response_data": {
-        "id": 1,
-        "question": "사용자 질문",
-        "answer": "AI 답변",
-        "created_at": "datetime"
-      }
-    },
-    {
-      "id": "P10",
-      "group": "AI Chat",
-      "method": "GET",
-      "url": "/api/v1/ai/chats/",
-      "auth": "required",
-      "purpose": "로그인 사용자의 AI 채팅 기록을 조회한다.",
-      "status": "미구현",
-      "body_example": null,
-      "expected_response_data": "AIChat[] (예상)"
     }
   ]
 }

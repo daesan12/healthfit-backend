@@ -6,12 +6,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.views import CommonResponseAPIView, error_response, success_response
+from config.pagination import paginate_data
 from diets.serializers import MealSerializer, SavedMealSerializer
 from workouts.models import WorkoutRoutine
 from workouts.serializers import RoutineItemSerializer, WorkoutRoutineSerializer
 
-from .models import AIRecommendation
+from .models import AIChat, AIRecommendation
 from .serializers import (
+    AIChatRequestSerializer,
+    AIChatSerializer,
     DietEvaluationRequestSerializer,
     DietFeedbackSerializer,
     DietRecommendationRequestSerializer,
@@ -23,6 +26,7 @@ from .serializers import (
     WorkoutRecommendationRequestSerializer,
     WorkoutProgressionRequestSerializer,
 )
+from .services.chat_service import create_chat_answer
 from .services.gms_client import GMSAPIError, GMSConfigurationError, GMSResponseError
 from .services.recommendation_service import (
     AIServiceError,
@@ -77,6 +81,42 @@ class AIAPIView(CommonResponseAPIView):
         raise exc
 
 
+def request_guardrail_text(request):
+    values = []
+    for field in ['message', 'preference']:
+        value = request.data.get(field)
+        if isinstance(value, str) and value.strip() and value.strip() not in values:
+            values.append(value.strip())
+    return '\n'.join(values) or None
+
+
+class AIChatListCreateView(AIAPIView):
+    def get(self, request):
+        chats = AIChat.objects.filter(user=request.user).order_by('-created_at', '-id')
+        data = paginate_data(request, chats, AIChatSerializer)
+        return success_response('AI 채팅 기록 조회 성공', data)
+
+    def post(self, request):
+        key_error = self.require_gms_key()
+        if key_error:
+            return key_error
+        serializer = AIChatRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response('AI 채팅 요청에 실패했습니다.', serializer.errors)
+
+        question = serializer.validated_data['question']
+        try:
+            answer = create_chat_answer(request.user, question)
+        except (GMSConfigurationError, GMSAPIError, GMSResponseError) as exc:
+            return self.service_error_response(exc)
+        chat = AIChat.objects.create(user=request.user, question=question, answer=answer)
+        return success_response(
+            'AI 답변이 생성되었습니다.',
+            AIChatSerializer(chat).data,
+            status.HTTP_201_CREATED,
+        )
+
+
 class DietEvaluationView(AIAPIView):
     def post(self, request):
         key_error = self.require_gms_key()
@@ -105,7 +145,11 @@ class DietRecommendationView(AIAPIView):
             return error_response('AI 식단 추천에 실패했습니다.', serializer.errors)
 
         try:
-            data = recommend_diet(request.user, serializer.validated_data)
+            data = recommend_diet(
+                request.user,
+                serializer.validated_data,
+                guardrail_text=request_guardrail_text(request),
+            )
         except (GMSConfigurationError, GMSAPIError, GMSResponseError, AIServiceError) as exc:
             return self.service_error_response(exc)
         return success_response('AI 식단 추천이 완료되었습니다.', data)
@@ -122,7 +166,11 @@ class WorkoutRecommendationView(AIAPIView):
             return error_response('AI 운동 루틴 추천에 실패했습니다.', serializer.errors)
 
         try:
-            data = recommend_workout(request.user, serializer.validated_data)
+            data = recommend_workout(
+                request.user,
+                serializer.validated_data,
+                guardrail_text=request_guardrail_text(request),
+            )
         except (GMSConfigurationError, GMSAPIError, GMSResponseError, AIServiceError) as exc:
             return self.service_error_response(exc)
         return success_response('AI 운동 루틴 추천이 완료되었습니다.', data)

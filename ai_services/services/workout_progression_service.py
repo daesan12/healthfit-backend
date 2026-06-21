@@ -267,7 +267,10 @@ def round_to_increment(value, increment):
 def gms_or_preliminary(payload, preliminary, recovery, exercise, history):
     fallback = format_preliminary(preliminary)
     try:
-        ai_result = GMSClient().generate_json(build_workout_progression_prompt(payload))
+        ai_result = GMSClient().generate_json(
+            build_workout_progression_prompt(payload),
+            temperature=0.6,
+        )
         serializer = WorkoutProgressionAIResultSerializer(data=ai_result)
         if not serializer.is_valid():
             return fallback

@@ -11,9 +11,11 @@ from accounts.models import Profile
 from diets.models import Food, FoodSnapshot, Meal, SavedMeal, SavedMealPlan
 from workouts.models import Exercise, RoutineItem, WorkoutLog, WorkoutLogSet, WorkoutRoutine
 
-from .models import AIRecommendation, DietFeedback
+from .models import AIChat, AIRecommendation, DietFeedback
+from .prompts import MEDICAL_BLOCKED_MESSAGE, UNSUPPORTED_BLOCKED_MESSAGE
 from .services.gms_client import GMSClient
-from .services.gms_client import GMSAPIError
+from .services.gms_client import GMSAPIError, GMSResponseError
+from .services.guardrail_service import classify_healthfit_input
 from .services.recommendation_service import select_exercise_candidates
 
 
@@ -102,6 +104,19 @@ class AIApiTests(APITestCase):
             instructions=['Press the dumbbells.'],
         )
         self.client.force_authenticate(self.user)
+        self.guardrail_patcher = patch(
+            'ai_services.services.recommendation_service.classify_healthfit_input',
+            return_value={
+                'is_allowed': True,
+                'category': 'health_habit',
+                'risk_level': 'normal',
+                'relevant_summary': 'HealthFit 관련 요청',
+                'reason': '테스트 기본 허용',
+                'blocked_message': '',
+            },
+        )
+        self.mock_recommendation_guardrail = self.guardrail_patcher.start()
+        self.addCleanup(self.guardrail_patcher.stop)
 
     def test_missing_gms_key_returns_required_common_error(self):
         with patch.dict(os.environ, {'GMS_KEY': ''}):
@@ -239,7 +254,16 @@ class AIApiTests(APITestCase):
         self.assertEqual(response.data['data']['food_source'], 'all')
         self.assertTrue(response.data['data']['save_available'])
         self.assertEqual(AIRecommendation.objects.filter(user=self.user).count(), 1)
+        recommendation = AIRecommendation.objects.get(user=self.user)
+        self.assertEqual(recommendation.input_data['message'], '고단백 저녁 추천해줘')
+        self.mock_recommendation_guardrail.assert_called_with(
+            '고단백 저녁 추천해줘',
+            request_context='diet recommendation request',
+        )
+        condition_prompt = mock_generate.call_args_list[0].args[0]
         recommendation_prompt = mock_generate.call_args_list[1].args[0]
+        self.assertIn('HealthFit 관련 요청', condition_prompt)
+        self.assertIn('HealthFit PT coach voice', recommendation_prompt)
         self.assertNotIn(self.impractical_food.name, recommendation_prompt)
 
     @patch('ai_services.services.recommendation_service.GMSClient.generate_json')
@@ -1093,3 +1117,183 @@ class AIApiTests(APITestCase):
             result_data=content,
             content=content,
         )
+
+
+class AIGuardrailAndChatTests(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='guardrail-user',
+            email='guardrail@example.com',
+            password='password123!',
+        )
+        Profile.objects.create(
+            user=self.user,
+            gender='male',
+            age=30,
+            height=175,
+            weight=75,
+            body_type='normal',
+            activity_level='normal',
+            workout_goal='fat_loss',
+            workout_experience='beginner',
+        )
+        self.client.force_authenticate(self.user)
+
+    @patch('ai_services.services.guardrail_service.GMSClient.generate_json')
+    def test_guardrail_parse_failure_uses_safe_fallback(self, mock_generate):
+        mock_generate.side_effect = GMSResponseError('invalid JSON')
+
+        result = classify_healthfit_input(
+            '게임 랭크 올리는 법 알려줘',
+            request_context='AI chat question',
+        )
+
+        self.assertFalse(result['is_allowed'])
+        self.assertEqual(result['category'], 'unsupported')
+        self.assertEqual(result['blocked_message'], UNSUPPORTED_BLOCKED_MESSAGE)
+        self.assertIn('Failed to parse', result['reason'])
+        self.assertEqual(mock_generate.call_args.kwargs['temperature'], 0)
+
+    @patch('ai_services.services.chat_service.GMSClient.generate_json')
+    @patch('ai_services.services.chat_service.classify_healthfit_input')
+    def test_allowed_chat_uses_latest_five_history_and_preserves_question(
+        self,
+        mock_classify,
+        mock_generate,
+    ):
+        for index in range(6):
+            AIChat.objects.create(
+                user=self.user,
+                question=f'이전 질문 {index}',
+                answer=f'이전 답변 {index}',
+            )
+        mock_classify.return_value = {
+            'is_allowed': True,
+            'category': 'diet',
+            'risk_level': 'normal',
+            'relevant_summary': '내일 식단을 이어서 추천해 달라는 요청',
+            'reason': '최근 식단 대화와 이어지는 질문',
+            'blocked_message': '',
+        }
+        mock_generate.return_value = {'answer': '좋습니다. 내일은 단백질부터 확보합니다.'}
+        question = '그럼 내일은?'
+
+        with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
+            response = self.client.post('/api/v1/ai/chats/', {'question': question}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        chat = AIChat.objects.get(pk=response.data['data']['id'])
+        self.assertEqual(chat.question, question)
+        self.assertEqual(chat.answer, '좋습니다. 내일은 단백질부터 확보합니다.')
+        history = mock_classify.call_args.kwargs['recent_history']
+        self.assertNotIn('이전 질문 0', history)
+        self.assertIn('이전 질문 1', history)
+        self.assertLess(history.index('이전 질문 1'), history.index('이전 질문 5'))
+        self.assertEqual(mock_generate.call_args.kwargs['temperature'], 0.7)
+
+    @patch('ai_services.services.chat_service.GMSClient.generate_json')
+    @patch('ai_services.services.chat_service.classify_healthfit_input')
+    def test_unsupported_chat_saves_fixed_blocked_answer(self, mock_classify, mock_generate):
+        mock_classify.return_value = {
+            'is_allowed': False,
+            'category': 'unsupported',
+            'risk_level': 'normal',
+            'relevant_summary': '',
+            'reason': 'HealthFit 범위 밖 질문',
+            'blocked_message': UNSUPPORTED_BLOCKED_MESSAGE,
+        }
+
+        with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
+            response = self.client.post(
+                '/api/v1/ai/chats/',
+                {'question': '리그 오브 레전드 랭크 올리는 법 알려줘'},
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['data']['answer'], UNSUPPORTED_BLOCKED_MESSAGE)
+        self.assertEqual(AIChat.objects.get().answer, UNSUPPORTED_BLOCKED_MESSAGE)
+        mock_generate.assert_not_called()
+
+    @patch('ai_services.services.recommendation_service.classify_healthfit_input')
+    def test_medical_diet_preference_returns_common_blocked_error(self, mock_classify):
+        mock_classify.return_value = {
+            'is_allowed': False,
+            'category': 'medical_caution',
+            'risk_level': 'unsafe',
+            'relevant_summary': '',
+            'reason': '치료 또는 위험한 식단 요청',
+            'blocked_message': MEDICAL_BLOCKED_MESSAGE,
+        }
+
+        with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
+            response = self.client.post(
+                '/api/v1/ai/diet/recommendations/',
+                {
+                    'scope': 'meal',
+                    'message': '약을 끊고 극단적으로 굶는 식단을 짜줘',
+                    'target_date': '2026-06-21',
+                    'food_source': 'all',
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data['success'])
+        self.assertEqual(response.data['errors']['guardrail'], [MEDICAL_BLOCKED_MESSAGE])
+        self.assertFalse(AIRecommendation.objects.exists())
+
+    @patch('ai_services.services.recommendation_service.classify_healthfit_input')
+    def test_unrelated_workout_preference_returns_common_blocked_error(self, mock_classify):
+        mock_classify.return_value = {
+            'is_allowed': False,
+            'category': 'unsupported',
+            'risk_level': 'normal',
+            'relevant_summary': '',
+            'reason': '운동과 무관한 요청',
+            'blocked_message': UNSUPPORTED_BLOCKED_MESSAGE,
+        }
+
+        with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
+            response = self.client.post(
+                '/api/v1/ai/workout/recommendations/',
+                {
+                    'message': '게임 랭크 올리는 방법 알려줘',
+                    'available_time': 40,
+                    'exercise_source': 'all',
+                },
+                format='json',
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['errors']['guardrail'], [UNSUPPORTED_BLOCKED_MESSAGE])
+        self.assertFalse(AIRecommendation.objects.exists())
+
+    def test_chat_history_is_owner_only_and_paginated(self):
+        User = get_user_model()
+        other = User.objects.create_user(
+            username='other-chat-user',
+            email='other-chat@example.com',
+            password='password123!',
+        )
+        AIChat.objects.bulk_create([
+            AIChat(user=self.user, question=f'질문 {index}', answer=f'답변 {index}')
+            for index in range(23)
+        ])
+        AIChat.objects.create(user=other, question='타인 질문', answer='타인 답변')
+
+        response = self.client.get('/api/v1/ai/chats/?page=2&page_size=10')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['data']['count'], 23)
+        self.assertEqual(len(response.data['data']['results']), 10)
+        self.assertTrue(all(item['question'] != '타인 질문' for item in response.data['data']['results']))
+
+    def test_chat_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get('/api/v1/ai/chats/')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertFalse(response.data['success'])

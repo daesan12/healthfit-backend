@@ -1,7 +1,28 @@
 from rest_framework import serializers
 from django.utils import timezone
 
-from .models import DietFeedback
+from .models import AIChat, DietFeedback
+
+
+class GuardrailResultSerializer(serializers.Serializer):
+    is_allowed = serializers.BooleanField()
+    category = serializers.ChoiceField(choices=[
+        'diet', 'workout', 'nutrition', 'health_habit', 'medical_caution', 'unsupported',
+    ])
+    risk_level = serializers.ChoiceField(choices=['normal', 'caution', 'unsafe'])
+    relevant_summary = serializers.CharField(allow_blank=True)
+    reason = serializers.CharField(allow_blank=True)
+    blocked_message = serializers.CharField(allow_blank=True)
+
+
+class AIChatRequestSerializer(serializers.Serializer):
+    question = serializers.CharField(allow_blank=False, max_length=2000)
+
+
+class AIChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AIChat
+        fields = ['id', 'question', 'answer', 'created_at']
 
 
 class DietEvaluationRequestSerializer(serializers.Serializer):

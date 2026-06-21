@@ -22,6 +22,7 @@ from ai_services.serializers import (
 )
 
 from .gms_client import GMSClient, GMSResponseError
+from .guardrail_service import classify_healthfit_input
 from .prompt_builder import (
     build_diet_condition_prompt,
     build_diet_evaluation_prompt,
@@ -124,11 +125,31 @@ def validate_ai_result(serializer_class, data):
     return serializer.validated_data
 
 
-def generate_stage_json(client, prompt, stage):
+def generate_stage_json(client, prompt, stage, temperature=None):
     try:
-        return client.generate_json(prompt)
+        return client.generate_json(prompt, temperature=temperature)
     except GMSResponseError as exc:
         raise GMSResponseError(f'{stage}: {exc}') from exc
+
+
+def guardrail_context_or_error(text, request_context):
+    if not text or not str(text).strip():
+        return None
+    result = classify_healthfit_input(str(text), request_context=request_context)
+    if not result['is_allowed']:
+        raise AIServiceError(
+            'AI request was blocked.',
+            {
+                'guardrail': [result['blocked_message']],
+                'category': [result['category']],
+                'risk_level': [result['risk_level']],
+            },
+        )
+    return {
+        'category': result['category'],
+        'risk_level': result['risk_level'],
+        'relevant_summary': result['relevant_summary'],
+    }
 
 
 def candidate_limit(conditions):
@@ -201,6 +222,7 @@ def evaluate_diet(user, target_date):
         GMSClient(),
         build_diet_evaluation_prompt(context),
         'diet_evaluation',
+        temperature=0.6,
     )
     validated = validate_ai_result(DietEvaluationAIResultSerializer, ai_result)
     result_data['recommended_actions'] = validated['recommended_actions']
@@ -232,8 +254,10 @@ def recommend_diet(
     parent_recommendation=None,
     stored_scope=None,
     original_scope=None,
+    guardrail_text=None,
 ):
     request_data = json_safe(request_data)
+    guardrail = guardrail_context_or_error(guardrail_text, 'diet recommendation request')
     profile = getattr(user, 'profile', None)
     profile_data = profile_context(user)
     target_date = request_data['target_date']
@@ -264,13 +288,15 @@ def recommend_diet(
         'current_intake': totals,
         'remaining': remaining,
         'meal_specs': meal_specs,
+        'guardrail': guardrail,
     }
 
     client = GMSClient()
     condition_result = generate_stage_json(
         client,
-        build_diet_condition_prompt(request_data, profile_data),
+        build_diet_condition_prompt(request_data, profile_data, guardrail),
         'diet_condition_analysis',
+        temperature=0,
     )
     condition = validate_ai_result(ConditionAIResultSerializer, condition_result)
     condition.pop('scope', None)
@@ -384,6 +410,7 @@ def generate_validated_diet_plan(client, context, meal_specs, candidates=None, f
                 correction=correction,
             ),
             'diet_recommendation_generation' if attempt == 0 else 'diet_recommendation_retry',
+            temperature=0.6,
         )
         ai_result = normalize_legacy_plan_response(ai_result, meal_specs)
         if free:
@@ -857,6 +884,7 @@ def replace_diet_item(user, recommendation, request_data):
             profile_context(user),
         ),
         'diet_replacement_condition_analysis',
+        temperature=0,
     )
     condition = validate_ai_result(ConditionAIResultSerializer, condition_data)
     context = {
@@ -871,6 +899,7 @@ def replace_diet_item(user, recommendation, request_data):
             client,
             build_diet_replacement_prompt(context, free=True),
             'diet_replacement_generation',
+            temperature=0.6,
         )
         validated = validate_ai_result(FreeDietItemAIResultSerializer, ai_result.get('item', ai_result))
         nutrition = validated['nutrition_per_100g']
@@ -897,6 +926,7 @@ def replace_diet_item(user, recommendation, request_data):
             client,
             build_diet_replacement_prompt(context, candidates),
             'diet_replacement_generation',
+            temperature=0.6,
         )
         validated = validate_ai_result(CandidateDietItemAIResultSerializer, ai_result.get('item', ai_result))
         food_map = {food.id: food for food in foods}
@@ -979,14 +1009,16 @@ def reroll_diet(user, recommendation, message):
     )
 
 
-def recommend_workout(user, request_data):
+def recommend_workout(user, request_data, guardrail_text=None):
     request_data = json_safe(request_data)
+    guardrail = guardrail_context_or_error(guardrail_text, 'workout recommendation request')
     profile_data = profile_context(user)
     client = GMSClient()
     condition_result = generate_stage_json(
         client,
-        build_workout_condition_prompt(request_data, profile_data),
+        build_workout_condition_prompt(request_data, profile_data, guardrail),
         'workout_condition_analysis',
+        temperature=0,
     )
     condition = validate_ai_result(ConditionAIResultSerializer, condition_result)
     source = request_data['exercise_source']
@@ -1018,11 +1050,13 @@ def recommend_workout(user, request_data):
         'request': request_data,
         'profile': profile_data,
         'condition': condition,
+        'guardrail': guardrail,
     }
     ai_result = generate_stage_json(
         client,
         build_workout_recommendation_prompt(context, candidates),
         'workout_recommendation_generation',
+        temperature=0.6,
     )
     validated = validate_ai_result(WorkoutAIResultSerializer, ai_result)
     result = build_validated_workout_result(validated, exercises, source)

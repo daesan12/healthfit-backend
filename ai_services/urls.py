@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    AIChatListCreateView,
     DietEvaluationView,
     DietRecommendationDetailView,
     DietRecommendationReplaceView,
@@ -15,6 +16,7 @@ from .views import (
 
 
 urlpatterns = [
+    path('chats/', AIChatListCreateView.as_view(), name='ai-chat-list-create'),
     path('diet/evaluations/', DietEvaluationView.as_view(), name='ai-diet-evaluation'),
     path('diet/recommendations/', DietRecommendationView.as_view(), name='ai-diet-recommendation'),
     path(

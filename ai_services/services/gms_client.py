@@ -32,14 +32,17 @@ class GMSClient:
         self.api_key = os.getenv('GMS_KEY', '').strip()
         self.timeout = timeout
 
-    def generate_json(self, prompt):
+    def generate_json(self, prompt, temperature=None):
         if not self.api_key:
             raise GMSConfigurationError('GMS_KEY is missing.')
 
         url = f'{DEFAULT_GMS_ENDPOINT}/models/{DEFAULT_GMS_MODEL}:generateContent'
+        generation_config = {'responseMimeType': 'application/json'}
+        if temperature is not None:
+            generation_config['temperature'] = temperature
         payload = {
             'contents': [{'parts': [{'text': prompt}]}],
-            'generationConfig': {'responseMimeType': 'application/json'},
+            'generationConfig': generation_config,
         }
         for attempt in range(DEFAULT_MAX_ATTEMPTS):
             try:
