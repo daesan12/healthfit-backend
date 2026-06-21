@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Comment, Like, Post, SharedPostSave
+
+
+admin.site.register([Post, Comment, Like, SharedPostSave])

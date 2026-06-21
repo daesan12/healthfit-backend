@@ -4,8 +4,8 @@
 
 - Base URL: `http://127.0.0.1:8000/api/v1`
 - 인증 방식: JWT Bearer
-- 최종 갱신: 2026-06-20
-- 현재 구현된 method/path: 67개
+- 최종 갱신: 2026-06-21
+- 현재 구현된 method/path: 69개
 - 향후 구현 예정 method/path: 6개 (`Planned / Not Implemented Yet APIs`에 별도 표기)
 
 ## 1. 공통 규칙
@@ -44,7 +44,7 @@ Content-Type: application/json
 
 ## 2. Implemented APIs
 
-아래 67개 method/path만 현재 백엔드에서 구현된 API이다.
+아래 69개 method/path만 현재 백엔드에서 구현된 API이다.
 
 | 그룹 | Method | Endpoint | 인증 | 설명 |
 |---|---|---|---|---|
@@ -104,6 +104,8 @@ Content-Type: application/json
 | Comment | PATCH | `/api/v1/comments/{comment_id}/` | 필요 | 내 댓글 수정 |
 | Comment | DELETE | `/api/v1/comments/{comment_id}/` | 필요 | 내 댓글 삭제 |
 | Like | POST | `/api/v1/posts/{post_id}/like/` | 필요 | 좋아요 생성 또는 취소 |
+| Community Share | POST | `/api/v1/posts/{post_id}/save-shared-meal/` | 필요 | 게시글의 공유 식단을 내 저장 식단으로 복사 |
+| Community Share | POST | `/api/v1/posts/{post_id}/save-shared-routine/` | 필요 | 게시글의 공유 루틴을 내 운동 루틴으로 복사 |
 | Public Profile | GET | `/api/v1/users/{user_id}/public-profile/` | 선택 | 사용자 공개 프로필 조회 |
 | AI Diet | POST | `/api/v1/ai/diet/evaluations/` | 필요 | GMS 기반 하루 식단 평가 |
 | AI Diet | POST | `/api/v1/ai/diet/recommendations/` | 필요 | GMS 기반 식단 추천 |
@@ -423,6 +425,13 @@ Profile이나 기록이 없으면 `null`, `0`, 빈 배열을 반환한다.
 
 GET `/posts/` query: `search`, `author`, `category` (`diet`, `workout`, `free`), `page`.
 
+Post 생성/수정 request에는 기존 필드와 다음 선택 필드를 사용할 수 있다.
+
+- `shared_saved_meal_id`: `diet` 게시글에서만 사용하며 작성자 본인의 SavedMeal PK
+- `shared_workout_routine_id`: `workout` 게시글에서만 사용하며 작성자 본인의 WorkoutRoutine PK
+- `free` 게시글은 공유 항목을 첨부할 수 없다.
+- 한 게시글에는 공유 식단과 공유 루틴을 동시에 첨부할 수 없다.
+
 Post 목록 response:
 
 ```json
@@ -433,7 +442,7 @@ Post 목록 response:
     "count":1,
     "page":1,
     "page_size":10,
-    "results":[{"id":1,"author":{"id":1,"username":"user01"},"title":"오늘의 운동 기록","content":"전신 운동을 완료했습니다.","category":"workout","comment_count":1,"like_count":2,"is_liked":true,"created_at":"2026-06-20T10:00:00Z","updated_at":"2026-06-20T10:00:00Z"}]
+    "results":[{"id":1,"author":{"id":1,"username":"user01"},"title":"오늘의 운동 기록","content":"전신 운동을 완료했습니다.","category":"workout","shared_type":"workout_routine","shared_saved_meal":null,"shared_workout_routine":{"id":5,"name":"주 3회 전신 루틴","description":"초보자용","exercise_count":1,"items":[{"exercise_id":12,"exercise_name":"푸쉬업","order":1,"sets":3,"reps":10,"weight":0,"rest_seconds":60}]},"viewer_save_status":{"saved":false,"saved_meal_id":null,"workout_routine_id":null},"comment_count":1,"like_count":2,"is_liked":true,"created_at":"2026-06-21T10:00:00Z","updated_at":"2026-06-21T10:00:00Z"}]
   }
 }
 ```
@@ -441,16 +450,38 @@ Post 목록 response:
 POST `/posts/`:
 
 ```json
-{"title":"오늘의 운동 기록","content":"전신 운동을 완료했습니다.","category":"workout"}
+{"title":"초보자 전신 루틴 공유","content":"주 3회 진행합니다.","category":"workout","shared_workout_routine_id":5}
 ```
 
 GET `/posts/{post_id}/` data는 Post 필드와 `comments` 배열을 반환한다.
 
 ```json
-{"id":1,"author":{"id":1,"username":"user01"},"title":"오늘의 운동 기록","content":"전신 운동을 완료했습니다.","category":"workout","comment_count":1,"like_count":2,"is_liked":true,"created_at":"2026-06-20T10:00:00Z","updated_at":"2026-06-20T10:00:00Z","comments":[{"id":1,"post_id":1,"author":{"id":2,"username":"user02"},"content":"좋은 기록입니다!","created_at":"2026-06-20T10:10:00Z","updated_at":"2026-06-20T10:10:00Z"}]}
+{"id":1,"author":{"id":1,"username":"user01"},"title":"고단백 식단 공유","content":"운동 후 식단입니다.","category":"diet","shared_type":"saved_meal","shared_saved_meal":{"id":3,"name":"닭가슴살 현미밥 식단","description":"고단백 감량 식단","total_calories":520,"total_carbohydrate":55,"total_protein":42,"total_fat":12,"items":[{"food_id":1,"food_name":"현미밥","ai_food_key":null,"amount":150,"calories":230,"carbohydrate":50,"protein":5,"fat":2,"nutrition_per_100g":{"calories":153.33,"carbohydrate":33.33,"protein":3.33,"fat":1.33},"source_type":"db"}]},"shared_workout_routine":null,"viewer_save_status":{"saved":false,"saved_meal_id":null,"workout_routine_id":null},"comment_count":1,"like_count":2,"is_liked":true,"created_at":"2026-06-21T10:00:00Z","updated_at":"2026-06-21T10:00:00Z","comments":[{"id":1,"post_id":1,"author":{"id":2,"username":"user02"},"content":"좋은 기록입니다!","created_at":"2026-06-21T10:10:00Z","updated_at":"2026-06-21T10:10:00Z"}]}
 ```
 
-PATCH `/posts/{post_id}/`은 `title`, `content`, `category` 일부를 받는다.
+PATCH `/posts/{post_id}/`은 `title`, `content`, `category`, `shared_saved_meal_id`, `shared_workout_routine_id` 일부를 받는다. 공유 대상이 바뀌면 snapshot을 다시 생성하고, `free`로 변경하면 공유 필드와 snapshot을 모두 제거한다.
+
+Post response 공유 필드:
+
+- `shared_type`: `saved_meal`, `workout_routine`, `null`
+- `shared_saved_meal`: 게시 시점의 저장 식단 snapshot 또는 `null`
+- `shared_workout_routine`: 게시 시점의 운동 루틴 snapshot 또는 `null`
+- `viewer_save_status`: 인증 사용자의 복사 여부와 생성된 PK. 비인증 조회에서는 `null`
+- 원본 저장 식단/루틴이 수정되거나 삭제되어도 게시글 snapshot은 유지된다.
+
+POST `/posts/{post_id}/save-shared-meal/`은 body 없이 호출하며 JWT 인증이 필요하다.
+
+```json
+{"success":true,"message":"공유 식단이 내 저장 식단에 추가되었습니다.","data":{"saved_meal_id":12,"name":"닭가슴살 현미밥 식단","already_saved":false}}
+```
+
+POST `/posts/{post_id}/save-shared-routine/`은 body 없이 호출하며 JWT 인증이 필요하다.
+
+```json
+{"success":true,"message":"공유 루틴이 내 운동 루틴에 추가되었습니다.","data":{"routine_id":9,"name":"주 3회 전신 루틴","already_saved":false}}
+```
+
+같은 사용자가 같은 게시글의 같은 공유 유형을 다시 저장하면 새 항목을 만들지 않고 기존 PK와 `already_saved:true`를 반환한다. 복사본은 요청 사용자 소유이며 원본은 변경하지 않는다.
 
 POST `/posts/{post_id}/comments/` 및 PATCH `/comments/{comment_id}/`:
 

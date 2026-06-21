@@ -1,10 +1,10 @@
 {
   "name": "HealthFit Backend API",
-  "version": "2026-06-20-current-backend",
+  "version": "2026-06-21-current-backend",
   "status": "current backend contract",
   "base_url": "http://127.0.0.1:8000/api/v1",
   "canonical_human_document": "api명세서.txt",
-  "endpoint_count": 67,
+  "endpoint_count": 69,
   "planned_endpoint_count": 6,
   "planned_notice": "프론트 연동 시에는 Implemented APIs 섹션만 우선 사용한다. Planned / Not Implemented Yet APIs는 이후 구현 예정이며, 현재 백엔드에서는 호출하면 404가 발생할 수 있다.",
   "authentication": {
@@ -34,6 +34,8 @@
     "RoutineItem은 exercise_id, 새 WorkoutLog와 AI progression은 workout_id를 사용하며 모두 숫자 Exercise DB PK이다. WorkoutLog의 기존 exercise_id도 호환된다.",
     "Exercise 응답의 문자열 exercise_id는 외부 ExerciseDB 또는 custom 식별자이다.",
     "Post 목록 data는 {count,page,page_size,results} 객체이다.",
+    "diet 게시글은 작성자 본인의 shared_saved_meal_id, workout 게시글은 작성자 본인의 shared_workout_routine_id를 선택적으로 첨부할 수 있다.",
+    "Post의 공유 대상은 snapshot으로 응답되며 원본 수정/삭제 후에도 유지된다. 인증 사용자는 save-shared-meal 또는 save-shared-routine으로 자신의 계정에 복사할 수 있다.",
     "오류 응답은 Axios의 error.response.data에서 읽는다.",
     "AI API는 JWT 인증과 backend/.env의 GMS_KEY가 필요하다.",
     "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
@@ -56,7 +58,10 @@
     "WorkoutLogSet": ["id", "set_order", "weight_kg", "repetition", "duration_seconds", "rpe", "is_warmup", "created_at", "updated_at"],
     "WorkoutLog": ["id", "log_id", "workout_id", "exercise_id", "exercise", "routine_id", "workout_date", "workout_time", "set_count", "repetition", "memo", "sets", "created_at", "updated_at"],
     "Comment": ["id", "post_id", "author", "content", "created_at", "updated_at"],
-    "Post": ["id", "author", "title", "content", "category", "comment_count", "like_count", "is_liked", "created_at", "updated_at"],
+    "Post": ["id", "author", "title", "content", "category", "shared_type", "shared_saved_meal", "shared_workout_routine", "viewer_save_status", "comment_count", "like_count", "is_liked", "created_at", "updated_at"],
+    "SharedSavedMealSnapshot": ["id", "name", "description", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "items"],
+    "SharedWorkoutRoutineSnapshot": ["id", "name", "description", "exercise_count", "items"],
+    "ViewerSaveStatus": ["saved", "saved_meal_id", "workout_routine_id"],
     "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary"],
     "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
     "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
@@ -482,7 +487,7 @@
       "method": "POST",
       "url": "/api/v1/posts/",
       "auth": "required",
-      "body_fields": ["title:string(required)", "content:string(required)", "category:diet|workout|free(required)"],
+      "body_fields": ["title:string(required)", "content:string(required)", "category:diet|workout|free(required)", "shared_saved_meal_id:integer(optional, diet + owner only)", "shared_workout_routine_id:integer(optional, workout + owner only)"],
       "response_data": "Post + comments[]"
     },
     {
@@ -499,7 +504,7 @@
       "method": "PATCH",
       "url": "/api/v1/posts/{post_id}/",
       "auth": "required owner",
-      "body_fields": ["title:string(optional)", "content:string(optional)", "category:diet|workout|free(optional)"],
+      "body_fields": ["title:string(optional)", "content:string(optional)", "category:diet|workout|free(optional)", "shared_saved_meal_id:integer|null(optional, diet + owner only)", "shared_workout_routine_id:integer|null(optional, workout + owner only)"],
       "response_data": "Post"
     },
     {
@@ -643,6 +648,26 @@
       "auth": "required",
       "body_fields": ["workout_id:integer(required, Exercise DB PK)", "target_date:date(optional, default today)", "goal:string(optional, defaults to profile workout_goal)", "message:string(optional)"],
       "response_data": "{workout_id,workout_name,target_date,decision,recommendation,recovery_summary,history_summary,reason,safety_note}"
+    },
+    {
+      "id": 68,
+      "group": "Community Share",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/save-shared-meal/",
+      "auth": "required",
+      "body_fields": [],
+      "response_data": "{saved_meal_id:integer,name:string,already_saved:boolean}",
+      "behavior": "게시글의 공유 식단 snapshot으로 요청 사용자 소유 SavedMeal과 SavedMealItem을 복사한다. 같은 사용자의 중복 요청은 기존 복사본을 반환한다."
+    },
+    {
+      "id": 69,
+      "group": "Community Share",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/save-shared-routine/",
+      "auth": "required",
+      "body_fields": [],
+      "response_data": "{routine_id:integer,name:string,already_saved:boolean}",
+      "behavior": "게시글의 공유 루틴 snapshot으로 요청 사용자 소유 WorkoutRoutine과 RoutineItem을 복사한다. 같은 사용자의 중복 요청은 기존 복사본을 반환한다."
     }
   ],
   "planned_endpoints": [
