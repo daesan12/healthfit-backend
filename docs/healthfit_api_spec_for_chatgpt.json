@@ -42,7 +42,7 @@
     "AI API는 JWT 인증과 backend/.env의 GMS_KEY가 필요하다.",
     "AI chat POST와 식단/운동 추천의 message 또는 preference는 AI JSON guardrail을 먼저 통과하며 기존 추천 request field는 변경되지 않았다.",
     "AI chat은 POST {question:string}으로 생성하고 GET은 내 기록을 Pagination<AIChat>으로 반환한다.",
-    "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
+    "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions를 사용하고 기본 모델은 gpt-5.4-mini이다.",
     "food_source는 all, my_fridge, free이며 free 추천도 FoodSnapshot을 통해 저장할 수 있다.",
     "exercise_source는 all 또는 my_exercises이다.",
     "MealItem 개별 추가/수정/삭제와 DietFeedback 날짜 조회가 구현되어 있다.",

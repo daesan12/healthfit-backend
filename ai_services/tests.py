@@ -141,28 +141,29 @@ class AIApiTests(APITestCase):
         response = mock_post.return_value
         response.status_code = 200
         response.content = json.dumps({
-            'candidates': [
-                {'content': {'parts': [{'text': '```json\n{"ok":true}\n```'}]}},
+            'choices': [
+                {'message': {'content': '```json\n{"ok":true}\n```'}},
             ],
         }).encode('utf-8')
         response.json.return_value = json.loads(response.content.decode('utf-8'))
 
+        prompt = 'Return JSON.'
         with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
-            result = GMSClient().generate_json('JSON으로 응답하세요.')
+            result = GMSClient().generate_json(prompt)
 
         request_url = mock_post.call_args.args[0]
         request_payload = mock_post.call_args.kwargs['json']
+        request_headers = mock_post.call_args.kwargs['headers']
         self.assertEqual(
             request_url,
             'https://gms.ssafy.io/gmsapi/'
-            'generativelanguage.googleapis.com/v1beta/'
-            'models/gemini-2.5-flash-lite:generateContent',
+            'api.openai.com/v1/chat/completions',
         )
-        self.assertEqual(list(request_payload), ['contents', 'generationConfig'])
-        self.assertEqual(
-            request_payload['generationConfig']['responseMimeType'],
-            'application/json',
-        )
+        self.assertEqual(request_headers['Authorization'], 'Bearer test-key')
+        self.assertEqual(request_payload['model'], 'gpt-5.4-mini')
+        self.assertEqual(request_payload['messages'][0]['role'], 'developer')
+        self.assertEqual(request_payload['messages'][1]['content'], prompt)
+        self.assertEqual(request_payload['response_format'], {'type': 'json_object'})
         self.assertEqual(result, {'ok': True})
 
     @patch('ai_services.services.gms_client.requests.post')
@@ -173,15 +174,15 @@ class AIApiTests(APITestCase):
         valid_response = MagicMock()
         valid_response.status_code = 200
         valid_response.content = json.dumps({
-            'candidates': [
-                {'content': {'parts': [{'text': '{"ok":true}'}]}},
+            'choices': [
+                {'message': {'content': '{"ok":true}'}},
             ],
         }).encode('utf-8')
         valid_response.json.return_value = json.loads(valid_response.content.decode('utf-8'))
         mock_post.side_effect = [empty_response, valid_response]
 
         with patch.dict(os.environ, {'GMS_KEY': 'test-key'}):
-            result = GMSClient().generate_json('JSON으로 응답하세요.')
+            result = GMSClient().generate_json('Return JSON.')
 
         self.assertEqual(result, {'ok': True})
         self.assertEqual(mock_post.call_count, 2)

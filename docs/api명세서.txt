@@ -597,7 +597,7 @@ POST `/posts/{post_id}/like/`는 body 없이 호출한다.
 
 ## 14. AI Diet and Workout
 
-모든 AI API는 JWT 인증이 필요하다. 실제 GMS 키는 `backend/.env`의 `GMS_KEY`에만 저장한다. 모델명은 `gemini-2.5-flash-lite`, endpoint는 SSAFY GMS 프록시 `https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta`를 코드 기본값으로 사용하므로 다른 환경변수는 필요하지 않다.
+모든 AI API는 JWT 인증이 필요하다. 실제 GMS 키는 `backend/.env`의 `GMS_KEY`에만 저장한다. 모델명은 `gpt-5.4-mini`, endpoint는 SSAFY GMS 프록시 `https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions`를 코드 기본값으로 사용한다. `GMS_MODEL`, `GMS_ENDPOINT` 환경변수로 필요 시 override할 수 있다.
 
 GMS를 호출하는 평가·추천 API에서 키가 없으면 503과 다음 응답을 반환한다.
 

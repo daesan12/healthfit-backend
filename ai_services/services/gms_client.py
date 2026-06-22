@@ -6,9 +6,9 @@ import requests
 
 DEFAULT_GMS_ENDPOINT = (
     'https://gms.ssafy.io/gmsapi/'
-    'generativelanguage.googleapis.com/v1beta'
+    'api.openai.com/v1/chat/completions'
 )
-DEFAULT_GMS_MODEL = 'gemini-2.5-flash-lite'
+DEFAULT_GMS_MODEL = 'gpt-5.4-mini'
 DEFAULT_TIMEOUT_SECONDS = 30
 DEFAULT_MAX_ATTEMPTS = 2
 
@@ -30,23 +30,30 @@ class GMSResponseError(Exception):
 class GMSClient:
     def __init__(self, timeout=DEFAULT_TIMEOUT_SECONDS):
         self.api_key = os.getenv('GMS_KEY', '').strip()
+        self.model = os.getenv('GMS_MODEL', DEFAULT_GMS_MODEL).strip() or DEFAULT_GMS_MODEL
+        self.endpoint = os.getenv('GMS_ENDPOINT', DEFAULT_GMS_ENDPOINT).strip() or DEFAULT_GMS_ENDPOINT
         self.timeout = timeout
 
     def generate_json(self, prompt, temperature=None):
         if not self.api_key:
             raise GMSConfigurationError('GMS_KEY is missing.')
 
-        url = f'{DEFAULT_GMS_ENDPOINT}/models/{DEFAULT_GMS_MODEL}:generateContent'
-        generation_config = {'responseMimeType': 'application/json'}
-        if temperature is not None:
-            generation_config['temperature'] = temperature
         payload = {
-            'contents': [{'parts': [{'text': prompt}]}],
-            'generationConfig': generation_config,
+            'model': self.model,
+            'messages': [
+                {
+                    'role': 'developer',
+                    'content': 'Answer in Korean. Return only valid JSON.',
+                },
+                {'role': 'user', 'content': prompt},
+            ],
+            'response_format': {'type': 'json_object'},
         }
+        if temperature is not None:
+            payload['temperature'] = temperature
         for attempt in range(DEFAULT_MAX_ATTEMPTS):
             try:
-                response_data = self._request_json(url, payload)
+                response_data = self._request_json(self.endpoint, payload)
                 response_text = self._extract_response_text(response_data)
                 return self._parse_json_object(response_text)
             except GMSResponseError:
@@ -59,7 +66,7 @@ class GMSClient:
                 url,
                 headers={
                     'Content-Type': 'application/json',
-                    'x-goog-api-key': self.api_key,
+                    'Authorization': f'Bearer {self.api_key}',
                 },
                 json=payload,
                 timeout=self.timeout,
@@ -82,13 +89,8 @@ class GMSClient:
 
     def _extract_response_text(self, response_data):
         try:
-            parts = response_data['candidates'][0]['content']['parts']
-            response_text = ''.join(
-                part.get('text', '')
-                for part in parts
-                if isinstance(part, dict)
-            ).strip()
-        except (KeyError, IndexError, TypeError) as exc:
+            response_text = response_data['choices'][0]['message']['content'].strip()
+        except (AttributeError, KeyError, IndexError, TypeError) as exc:
             raise GMSResponseError('GMS response did not contain candidate text.') from exc
 
         if not response_text:
