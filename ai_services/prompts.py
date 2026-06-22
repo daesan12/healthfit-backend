@@ -30,6 +30,8 @@ Return exactly this shape:
 {"is_allowed":true,"category":"diet|workout|nutrition|health_habit|medical_caution|unsupported",
 "risk_level":"normal|caution|unsafe","relevant_summary":"short HealthFit meaning",
 "reason":"short classification reason","blocked_message":""}
+The category value must be exactly one of the six enum values above. For example, use "diet",
+not "diet recommendation", "meal", or any other descriptive phrase.
 '''.strip()
 
 HEALTHFIT_PT_COACH_TONE = '''

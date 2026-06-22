@@ -1221,6 +1221,27 @@ class AIGuardrailAndChatTests(APITestCase):
         self.assertIn('Failed to parse', result['reason'])
         self.assertEqual(mock_generate.call_args.kwargs['temperature'], 0)
 
+    @patch('ai_services.services.guardrail_service.GMSClient.generate_json')
+    def test_guardrail_normalizes_descriptive_diet_category(self, mock_generate):
+        mock_generate.return_value = {
+            'is_allowed': True,
+            'category': 'diet recommendation',
+            'risk_level': 'normal',
+            'relevant_summary': '맵지 않은 한식 고단백 저녁 식단 추천',
+            'reason': 'The user is asking for a diet recommendation.',
+            'blocked_message': '',
+        }
+
+        result = classify_healthfit_input(
+            '맵지 않은 한식 고단백 저녁 식단을 추천해줘.',
+            request_context='diet recommendation request',
+        )
+
+        self.assertTrue(result['is_allowed'])
+        self.assertEqual(result['category'], 'diet')
+        self.assertEqual(result['risk_level'], 'normal')
+        self.assertEqual(result['blocked_message'], '')
+
     @patch('ai_services.services.chat_service.GMSClient.generate_json')
     @patch('ai_services.services.chat_service.classify_healthfit_input')
     def test_allowed_chat_uses_latest_five_history_and_preserves_question(

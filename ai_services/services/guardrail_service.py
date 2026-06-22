@@ -19,6 +19,22 @@ GUARDRAIL_FALLBACK = {
     'blocked_message': UNSUPPORTED_BLOCKED_MESSAGE,
 }
 
+CATEGORY_ALIASES = {
+    'diet recommendation': 'diet',
+    'diet_recommendation': 'diet',
+    'meal': 'diet',
+    'meal plan': 'diet',
+    'meal_plan': 'diet',
+    'workout recommendation': 'workout',
+    'workout_recommendation': 'workout',
+    'exercise': 'workout',
+    'health habit': 'health_habit',
+    'healthy habit': 'health_habit',
+    'medical caution': 'medical_caution',
+    'out of scope': 'unsupported',
+    'out_of_scope': 'unsupported',
+}
+
 
 def classify_healthfit_input(text, *, request_context, recent_history=''):
     prompt = build_guardrail_prompt(text, request_context, recent_history)
@@ -27,7 +43,7 @@ def classify_healthfit_input(text, *, request_context, recent_history=''):
     except GMSResponseError:
         return dict(GUARDRAIL_FALLBACK)
 
-    serializer = GuardrailResultSerializer(data=result)
+    serializer = GuardrailResultSerializer(data=normalize_guardrail_result(result))
     if not serializer.is_valid():
         return dict(GUARDRAIL_FALLBACK)
 
@@ -42,6 +58,21 @@ def classify_healthfit_input(text, *, request_context, recent_history=''):
     else:
         classified['blocked_message'] = ''
     return classified
+
+
+def normalize_guardrail_result(result):
+    if not isinstance(result, dict):
+        return result
+
+    normalized = dict(result)
+    category = normalized.get('category')
+    if isinstance(category, str):
+        normalized_category = category.strip().lower().replace('-', ' ')
+        normalized['category'] = CATEGORY_ALIASES.get(
+            normalized_category,
+            normalized_category.replace(' ', '_'),
+        )
+    return normalized
 
 
 def build_guardrail_prompt(text, request_context, recent_history):
