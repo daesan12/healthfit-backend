@@ -27,9 +27,11 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = 'django-insecure-+iqk2+x#eg$yvn%3fh_g&vlo(j@!+vf%%sx&&7sr+ru)7#*@g4'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# 임시 데모(프레젠테이션)용 Cloudflare Tunnel 환경에서 실행하기 위해 True로 유지합니다.
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Cloudflare Tunnel(trycloudflare.com)과 로컬 접속을 모두 허용합니다.
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.trycloudflare.com']
 
 
 # Application definition
@@ -143,6 +145,17 @@ AUTH_USER_MODEL = 'accounts.User'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+]
+
+# Cloudflare Tunnel(trycloudflare.com)을 통해 노출되는 프론트엔드 요청을 허용합니다.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://.*\.trycloudflare\.com$',
+    r'^http://.*\.trycloudflare\.com$',
+]
+
+# Cloudflare Tunnel 환경에서 POST/PUT/DELETE 요청 시 CSRF 검증이 통과되도록 합니다.
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.trycloudflare.com',
 ]
 
 REST_FRAMEWORK = {
