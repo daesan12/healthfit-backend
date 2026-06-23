@@ -123,6 +123,19 @@ def create_saved_meal(user, recommendation, content, meal_data, title, descripti
     return saved_meal
 
 
+def selected_meals_for_saved_meal(meals, meal_orders):
+    if not meal_orders:
+        return []
+    wanted = set(meal_orders)
+    selected = [meal for meal in meals if meal.get('meal_order') in wanted]
+    if len(selected) != len(wanted):
+        raise AIServiceError(
+            'AI 추천 식단 저장에 실패했습니다.',
+            {'meal_orders': ['선택한 식사를 찾을 수 없습니다.']},
+        )
+    return selected
+
+
 def create_meal_plan(user, recommendation, content, meals, title, description):
     targets = content.get('daily_target') or {}
     totals = content.get('daily_totals') or meal_nutrition([
@@ -169,9 +182,11 @@ def save_diet_recommendation(user, recommendation, validated_data):
     target = validated_data['save_target']
     title = validated_data['title']
     description = validated_data.get('description', '')
+    meal_orders = validated_data.get('meal_orders') or []
     is_day = len(meals) > 1 or content.get('original_scope') == 'day' or content.get('scope') == 'day'
+    selected_saved_meals = selected_meals_for_saved_meal(meals, meal_orders)
 
-    if target == 'saved_meal' and is_day:
+    if target == 'saved_meal' and is_day and not selected_saved_meals:
         raise AIServiceError('AI 추천 식단 저장에 실패했습니다.', {'save_target': ['saved_meal은 한 끼 추천에서만 사용할 수 있습니다.']})
     if target == 'meal_plan' and not is_day:
         raise AIServiceError('AI 추천 식단 저장에 실패했습니다.', {'save_target': ['meal_plan은 하루 식단 추천에서 사용해주세요.']})
@@ -180,7 +195,21 @@ def save_diet_recommendation(user, recommendation, validated_data):
     if target in {'meals', 'both'}:
         created_meals = create_meals(user, recommendation, content, meals)
         result['meal_ids'] = [meal.id for meal in created_meals]
-    if target == 'saved_meal' or (target == 'both' and not is_day):
+    if target == 'saved_meal' and selected_saved_meals:
+        use_exact_title = len(selected_saved_meals) == 1
+        saved_meals = [
+            create_saved_meal(
+                user,
+                recommendation,
+                content,
+                meal_data,
+                title if use_exact_title else f'{title} - {meal_data.get("meal_label") or meal_data.get("meal_order")}',
+                description,
+            )
+            for meal_data in selected_saved_meals
+        ]
+        result['saved_meal_ids'] = [item.id for item in saved_meals]
+    elif target == 'saved_meal' or (target == 'both' and not is_day):
         saved_meal = create_saved_meal(user, recommendation, content, meals[0], title, description)
         result['saved_meal_id'] = saved_meal.id
     if target == 'meal_plan' or (target == 'both' and is_day):

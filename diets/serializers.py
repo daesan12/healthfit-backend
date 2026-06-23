@@ -70,8 +70,16 @@ class FoodSerializer(serializers.ModelSerializer):
 
 
 class MealItemInputSerializer(serializers.Serializer):
-    food_id = serializers.IntegerField()
+    food_id = serializers.IntegerField(required=False)
+    ai_food_key = serializers.CharField(required=False, max_length=100)
     amount = serializers.FloatField()
+
+    def validate(self, attrs):
+        if bool(attrs.get('food_id')) == bool(attrs.get('ai_food_key')):
+            raise serializers.ValidationError({
+                'item': ['food_id 또는 ai_food_key 중 하나만 입력해주세요.'],
+            })
+        return attrs
 
     def validate_amount(self, value):
         if value <= 0:
@@ -106,6 +114,12 @@ class MealItemSerializer(serializers.ModelSerializer):
 
 
 class MealItemCreateSerializer(MealItemInputSerializer):
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if attrs.get('ai_food_key'):
+            raise serializers.ValidationError({'food_id': ['식단 기록에는 DB 음식 ID가 필요합니다.']})
+        return attrs
+
     def validate_food_id(self, value):
         get_accessible_food(self.context['request'].user, value)
         return value
@@ -234,6 +248,8 @@ class MealSerializer(serializers.ModelSerializer):
         request = self.context['request']
 
         for item_data in items_data:
+            if item_data.get('ai_food_key'):
+                raise serializers.ValidationError({'items': ['식단 기록에는 DB 음식 ID가 필요합니다.']})
             food = get_accessible_food(request.user, item_data['food_id'], 'items')
             amount = item_data['amount']
             MealItem.objects.create(
@@ -327,20 +343,28 @@ class SavedMealSerializer(serializers.ModelSerializer):
         instance.save()
 
         if items_data is not None:
+            snapshot_map = {
+                item.food_snapshot.ai_food_key: item.food_snapshot
+                for item in instance.items.select_related('food_snapshot')
+                if item.food_snapshot_id
+            }
             instance.items.all().delete()
-            self._replace_items(instance, items_data)
+            self._replace_items(instance, items_data, snapshot_map=snapshot_map)
             instance._prefetched_objects_cache.pop('items', None)
 
         return instance
 
-    def _replace_items(self, saved_meal, items_data):
+    def _replace_items(self, saved_meal, items_data, snapshot_map=None):
         user = self.context['request'].user
+        snapshot_map = snapshot_map or {}
 
         for item_data in items_data:
-            food = self._get_food(item_data['food_id'], user)
+            food = self._get_food(item_data.get('food_id'), user) if item_data.get('food_id') else None
+            food_snapshot = self._get_food_snapshot(item_data.get('ai_food_key'), snapshot_map) if item_data.get('ai_food_key') else None
             SavedMealItem.objects.create(
                 saved_meal=saved_meal,
                 food=food,
+                food_snapshot=food_snapshot,
                 amount=item_data['amount'],
             )
 
@@ -348,6 +372,14 @@ class SavedMealSerializer(serializers.ModelSerializer):
 
     def _get_food(self, food_id, user):
         return get_accessible_food(user, food_id, 'items')
+
+    def _get_food_snapshot(self, ai_food_key, snapshot_map):
+        snapshot = snapshot_map.get(ai_food_key)
+        if snapshot is None:
+            raise serializers.ValidationError(
+                {'items': [f'유지할 수 있는 AI 자유 음식이 아닙니다: {ai_food_key}']}
+            )
+        return snapshot
 
 
 class SavedMealCreateMealSerializer(serializers.Serializer):

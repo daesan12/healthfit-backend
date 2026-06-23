@@ -544,7 +544,6 @@ def normalize_free_plan_response(ai_result, meal_specs):
                 'fat': first_numeric(nutrition, ['fat', 'fats']),
             }
             normalized_items.append({
-                'food_id': None,
                 'ai_food_key': item.get('ai_food_key') or (
                     f'free_{spec["meal_order"] if spec else meal_index + 1}_{item_index + 1}'
                 ),
@@ -687,7 +686,6 @@ def build_free_diet_result(validated, meal_specs, source, scope, targets, totals
             nutrition = item['nutrition_per_100g']
             amount = item['amount']
             items.append({
-                'food_id': None,
                 'ai_food_key': key,
                 'name': item['name'],
                 'food_name': item['name'],

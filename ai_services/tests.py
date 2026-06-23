@@ -786,6 +786,63 @@ class AIApiTests(APITestCase):
         self.assertEqual(Meal.objects.count(), 1)
         self.assertEqual(FoodSnapshot.objects.count(), 2)
 
+    def test_free_day_recommendation_selected_meals_can_be_saved_as_saved_meals(self):
+        recommendation = self.create_free_diet_recommendation(scope='day', meal_count=3)
+
+        response = self.client.post(
+            f'/api/v1/ai/diet/recommendations/{recommendation.id}/save/',
+            {
+                'save_target': 'saved_meal',
+                'title': '자유 추천 저장',
+                'meal_orders': [1, 3],
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(SavedMeal.objects.filter(user=self.user).count(), 2)
+        self.assertEqual(FoodSnapshot.objects.count(), 4)
+        self.assertEqual(len(response.data['data']['saved_meal_ids']), 2)
+
+    def test_free_saved_meal_can_be_edited_preserving_snapshot_items(self):
+        recommendation = self.create_free_diet_recommendation(scope='day', meal_count=1)
+        custom_title = 'Custom free saved meal'
+        save_response = self.client.post(
+            f'/api/v1/ai/diet/recommendations/{recommendation.id}/save/',
+            {
+                'save_target': 'saved_meal',
+                'title': '자유 추천 저장',
+                'meal_orders': [1],
+                'title': custom_title,
+            },
+            format='json',
+        )
+        saved_meal_id = save_response.data['data']['saved_meal_ids'][0]
+        saved_meal = SavedMeal.objects.get(pk=saved_meal_id)
+        self.assertEqual(saved_meal.name, custom_title)
+        items = list(saved_meal.items.select_related('food_snapshot').order_by('id'))
+
+        response = self.client.patch(
+            f'/api/v1/saved-meals/{saved_meal_id}/',
+            {
+                'name': '수정된 자유 추천',
+                'description': '설명 수정',
+                'items': [
+                    {
+                        'ai_food_key': items[0].food_snapshot.ai_food_key,
+                        'amount': 180,
+                    },
+                ],
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        saved_meal.refresh_from_db()
+        self.assertEqual(saved_meal.name, '수정된 자유 추천')
+        self.assertEqual(saved_meal.items.count(), 1)
+        self.assertEqual(saved_meal.items.first().food_snapshot.ai_food_key, items[0].food_snapshot.ai_food_key)
+
     def test_diet_recommendation_can_be_saved_as_meal_and_saved_meal(self):
         recommendation = self.create_diet_recommendation()
 

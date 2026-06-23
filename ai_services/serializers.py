@@ -124,12 +124,20 @@ class SaveSavedMealRequestSerializer(serializers.Serializer):
     SAVE_TARGET_CHOICES = ['meals', 'saved_meal', 'meal_plan', 'both']
 
     save_target = serializers.ChoiceField(choices=SAVE_TARGET_CHOICES, default='saved_meal')
+    meal_orders = serializers.ListField(
+        child=serializers.IntegerField(min_value=1, max_value=6),
+        required=False,
+        allow_empty=False,
+    )
     title = serializers.CharField(max_length=255, required=False, allow_blank=False)
     name = serializers.CharField(max_length=255, required=False, allow_blank=False, write_only=True)
     description = serializers.CharField(required=False, allow_blank=True, default='')
 
     def validate(self, attrs):
         attrs['title'] = attrs.get('title') or attrs.pop('name', None) or 'AI 추천 식단'
+        meal_orders = attrs.get('meal_orders')
+        if meal_orders:
+            attrs['meal_orders'] = list(dict.fromkeys(meal_orders))
         return attrs
 
 

@@ -60,8 +60,19 @@ def build_diet_condition_prompt(request_data, profile, guardrail=None):
 
 
 def build_diet_recommendation_prompt(context, candidates=None, free=False, correction=None):
-    candidate_text = '없음(자유 추천)' if free else dump(candidates or [])
     rules = '' if free else f' {CANDIDATE_ID_RULES}'
+    candidate_section = '' if free else f'음식 후보: {dump(candidates or [])}\n'
+    food_source_rule = (
+        'food_source가 free입니다. DB 음식 후보나 candidate id를 사용하지 말고, 현실적인 음식을 자유롭게 구성하세요. '
+        '각 item은 food_id 없이 ai_food_key, name, amount, role, nutrition_per_100g를 반드시 포함해야 합니다. '
+        'nutrition_per_100g는 100g 기준 calories, carbohydrate, protein, fat 숫자값입니다. '
+        if free
+        else (
+            '후보의 영양값은 100g 기준이며 amount는 실제 섭취할 gram 수입니다. '
+            '추천 컨텍스트의 제외 음식은 후보에 있더라도 절대 사용하지 마세요. '
+        )
+    )
+    meal_role_rule = '' if free else '음식명과 meal_role을 보고 평소 식탁에서 자연스럽게 함께 먹는 조합을 선택하세요. '
     meal_specs = context.get('meal_specs') or []
     expected_count = len(meal_specs)
     candidate_examples = candidates or []
@@ -71,7 +82,6 @@ def build_diet_recommendation_prompt(context, candidates=None, free=False, corre
         if free:
             items = [
                 {
-                    'food_id': None,
                     'ai_food_key': f'free_protein_{order}',
                     'name': '두부구이',
                     'amount': 150,
@@ -81,7 +91,6 @@ def build_diet_recommendation_prompt(context, candidates=None, free=False, corre
                     },
                 },
                 {
-                    'food_id': None,
                     'ai_food_key': f'free_carb_{order}',
                     'name': '현미밥',
                     'amount': 120,
@@ -122,16 +131,14 @@ def build_diet_recommendation_prompt(context, candidates=None, free=False, corre
         '단백질 메인 1개, 채소 또는 반찬 1개를 우선 포함하고 저탄수 요청이 아니라면 밥이나 일반적인 탄수화물 1개를 포함하세요. '
         '말린 식품, 건조 원물, 분말, 추출물, 조미료, 생식용 원재료만 여러 개 조합하지 마세요. '
         '같은 종류의 고단백 원재료를 여러 개 중복 추천하지 마세요. '
-        '음식명과 meal_role을 보고 평소 식탁에서 자연스럽게 함께 먹는 조합을 선택하세요. '
+        f'{meal_role_rule}'
         '권장 중량은 밥/면 100~250g, 단백질 메인 80~200g, 반찬/채소 30~150g, 국/찌개 150~300g 정도입니다. '
-        '후보의 영양값은 100g 기준이며 amount는 실제 섭취할 gram 수입니다. '
-        '추천 컨텍스트의 제외 음식은 후보에 있더라도 절대 사용하지 마세요. '
+        f'{food_source_rule}'
         'request의 scope, meal_count, meal_order, meal_label은 자연어 해석이나 condition 결과보다 우선하는 확정값입니다. '
         f'meals 배열은 반드시 정확히 {expected_count}개여야 합니다. 더 적거나 많으면 실패입니다. '
         '각 meal은 요청된 meal_order와 meal_label을 정확히 사용하세요. '
-        'free 모드는 모든 item에 고유한 ai_food_key와 nutrition_per_100g를 반드시 넣으세요.\n'
         f'추천 컨텍스트: {dump(context)}\n'
-        f'음식 후보: {candidate_text}\n'
+        f'{candidate_section}'
         f'다음 {expected_count}끼 JSON 골격을 그대로 유지하고 각 items만 조건에 맞게 구성하세요: '
         f'{dump(response_example)}'
     )
@@ -140,7 +147,7 @@ def build_diet_recommendation_prompt(context, candidates=None, free=False, corre
 def build_diet_replacement_prompt(context, candidates=None, free=False):
     candidate_text = '없음(자유 생성)' if free else dump(candidates or [])
     item_shape = (
-        '{"food_id":null,"ai_food_key":"free_fish_001","name":"구운 흰살생선",'
+        '{"ai_food_key":"free_fish_001","name":"구운 흰살생선",'
         '"amount":150,"role":"protein","nutrition_per_100g":'
         '{"calories":130,"carbohydrate":0,"protein":24,"fat":4}}'
         if free

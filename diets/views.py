@@ -386,7 +386,10 @@ class SavedMealListCreateView(CommonResponseAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        saved_meals = SavedMeal.objects.filter(user=request.user).prefetch_related('items__food')
+        saved_meals = SavedMeal.objects.filter(user=request.user).prefetch_related(
+            'items__food',
+            'items__food_snapshot',
+        )
         search = request.query_params.get('search')
         if search:
             saved_meals = saved_meals.filter(
@@ -418,7 +421,10 @@ class SavedMealDetailView(CommonResponseAPIView):
 
     def get_saved_meal(self, request, saved_meal_id, message):
         try:
-            return SavedMeal.objects.prefetch_related('items__food').get(
+            return SavedMeal.objects.prefetch_related(
+                'items__food',
+                'items__food_snapshot',
+            ).get(
                 id=saved_meal_id,
                 user=request.user,
             )
