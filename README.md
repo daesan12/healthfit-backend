@@ -21,6 +21,21 @@
 <br />
 
 ---
+## 🎬 시연 영상
+
+<p align="center">
+  <a href="https://youtu.be/SmkAQmLdLe4">
+    <img src="https://img.youtube.com/vi/SmkAQmLdLe4/maxresdefault.jpg" alt="HealthFit 시연 영상" width="700" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/SmkAQmLdLe4">
+    ▶ HealthFit 시연 영상 바로가기
+  </a>
+</p>
+
+---
 
 ## 📚 목차
 
