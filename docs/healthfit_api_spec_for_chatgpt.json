@@ -1,0 +1,753 @@
+{
+  "name": "HealthFit Backend API",
+  "version": "2026-06-21-current-backend",
+  "status": "current backend contract",
+  "base_url": "http://127.0.0.1:8000/api/v1",
+  "canonical_human_document": "api명세서.txt",
+  "endpoint_count": 76,
+  "planned_endpoint_count": 0,
+  "planned_notice": "현재 문서에 등록된 planned endpoint는 없다.",
+  "authentication": {
+    "type": "JWT Bearer",
+    "header": "Authorization: Bearer {access_token}",
+    "access_token_storage_key_used_by_frontend": "healthfit_access_token"
+  },
+  "common_response": {
+    "success": {
+      "success": true,
+      "message": "요청별 성공 메시지",
+      "data": "endpoint별 data"
+    },
+    "error": {
+      "success": false,
+      "message": "요청별 실패 메시지",
+      "errors": {
+        "field": ["오류 메시지"]
+      }
+    }
+  },
+  "frontend_notes": [
+    "Axios 원본 응답에서는 response.data.data를 사용한다.",
+    "frontend/src/api/client.js의 unwrapResponse()를 거친 함수는 내부 data를 직접 반환한다.",
+    "운동 endpoint는 /exercises/이며 /workouts/는 존재하지 않는다.",
+    "식단 대시보드는 /meals/dashboard/이다.",
+    "RoutineItem은 exercise_id, 새 WorkoutLog와 AI progression은 workout_id를 사용하며 모두 숫자 Exercise DB PK이다. WorkoutLog의 기존 exercise_id도 호환된다.",
+    "Exercise 응답의 문자열 exercise_id는 외부 ExerciseDB 또는 custom 식별자이다.",
+    "목록 pagination data는 {count,page,page_size,total_pages,next,previous,has_next,has_previous,results} 객체이다.",
+    "pagination page 기본값은 1, page_size 기본값은 20이고 최대 100이다. 필터를 먼저 적용한 후 페이지를 나눈다.",
+    "무한 스크롤은 page=1부터 시작해 next 또는 다음 page 번호를 요청하며 백엔드는 전체 목록을 한 번에 반환하지 않는다.",
+    "diet 게시글은 작성자 본인의 shared_saved_meal_id, workout 게시글은 작성자 본인의 shared_workout_routine_id를 선택적으로 첨부할 수 있다.",
+    "Post의 공유 대상은 snapshot으로 응답되며 원본 수정/삭제 후에도 유지된다. 인증 사용자는 save-shared-meal 또는 save-shared-routine으로 자신의 계정에 복사할 수 있다.",
+    "오류 응답은 Axios의 error.response.data에서 읽는다.",
+    "AI API는 JWT 인증과 backend/.env의 GMS_KEY가 필요하다.",
+    "AI chat POST와 식단/운동 추천의 message 또는 preference는 AI JSON guardrail을 먼저 통과하며 기존 추천 request field는 변경되지 않았다.",
+    "AI chat은 POST {question:string}으로 생성하고 GET은 내 기록을 Pagination<AIChat>으로 반환한다.",
+    "GMS endpoint는 SSAFY GMS 프록시 https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta를 사용한다.",
+    "food_source는 all, my_fridge, free이며 free 추천도 FoodSnapshot을 통해 저장할 수 있다.",
+    "exercise_source는 all 또는 my_exercises이다.",
+    "MealItem 개별 추가/수정/삭제와 DietFeedback 날짜 조회가 구현되어 있다.",
+    "운동 API는 difficulty, MET, estimated_calories, calories_burned, total_burned_calories를 사용하지 않는다."
+  ],
+  "schemas": {
+    "User": ["id", "username", "email"],
+    "Profile": ["id", "gender", "age", "height", "weight", "body_type", "activity_level", "workout_goal", "workout_experience"],
+    "BodyRecord": ["id", "record_date", "weight", "body_fat_percentage", "skeletal_muscle_mass", "bmi", "created_at"],
+    "Food": ["id", "name", "category", "calories", "carbohydrate", "protein", "fat", "user_id"],
+    "MealItem": ["id", "food_id", "food_name", "ai_food_key", "amount", "calories", "carbohydrate", "protein", "fat"],
+    "Meal": ["id", "meal_type", "meal_order", "meal_label", "intake_date", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "meal_items"],
+    "SavedMealItem": ["id", "food_id", "food_name", "ai_food_key", "amount", "calories", "carbohydrate", "protein", "fat"],
+    "SavedMeal": ["id", "name", "description", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "saved_meal_items", "created_at", "updated_at"],
+    "Exercise": ["id", "exercise_id", "name", "gif_url", "body_parts", "equipments", "target_muscles", "secondary_muscles", "instructions", "user_id", "created_at", "updated_at"],
+    "RoutineItem": ["id", "exercise", "order", "sets", "reps", "weight", "rest_seconds"],
+    "WorkoutRoutine": ["id", "name", "description", "items", "created_at", "updated_at"],
+    "WorkoutLogSet": ["id", "set_order", "weight_kg", "repetition", "duration_seconds", "rpe", "is_warmup", "created_at", "updated_at"],
+    "WorkoutLog": ["id", "log_id", "workout_id", "exercise_id", "exercise", "routine_id", "workout_date", "workout_time", "set_count", "repetition", "memo", "sets", "created_at", "updated_at"],
+    "Comment": ["id", "post_id", "author", "content", "created_at", "updated_at"],
+    "Post": ["id", "author", "title", "content", "category", "shared_type", "shared_saved_meal", "shared_workout_routine", "viewer_save_status", "comment_count", "like_count", "is_liked", "created_at", "updated_at"],
+    "SharedSavedMealSnapshot": ["id", "name", "description", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "items"],
+    "SharedWorkoutRoutineSnapshot": ["id", "name", "description", "exercise_count", "items"],
+    "ViewerSaveStatus": ["saved", "saved_meal_id", "workout_routine_id"],
+    "Pagination": ["count", "page", "page_size", "total_pages", "next", "previous", "has_next", "has_previous", "results"],
+    "Progress": ["start_date", "end_date", "profile", "body_summary", "meal_summary", "workout_summary", "chart_data"],
+    "PublicProfile": ["user", "profile", "post_count", "posts", "representative_saved_meal", "representative_workout_routine"],
+    "AIRecommendation": ["recommendation_id", "type", "scope", "food_source", "save_available", "title", "summary", "meals", "daily_target", "daily_totals", "actions"],
+    "DietFeedback": ["feedback_id", "date", "score", "total_calories", "total_carbohydrate", "total_protein", "total_fat", "target", "score_detail", "strengths", "improvements", "recommended_actions", "feedback"],
+    "AIChat": ["id", "question", "answer", "created_at"]
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "group": "Auth",
+      "method": "POST",
+      "url": "/api/v1/auth/signup/",
+      "auth": "none",
+      "body_fields": ["username:string(required)", "email:email(required)", "password:string(required)"],
+      "response_data": "User + created_at"
+    },
+    {
+      "id": 2,
+      "group": "Auth",
+      "method": "POST",
+      "url": "/api/v1/auth/login/",
+      "auth": "none",
+      "body_fields": ["login_id:string(required, username or email)", "password:string(required)"],
+      "response_data": "{access:string,refresh:string,user:User}"
+    },
+    {
+      "id": 3,
+      "group": "Auth",
+      "method": "POST",
+      "url": "/api/v1/auth/logout/",
+      "auth": "required",
+      "body_fields": ["refresh:string(required)"],
+      "response_data": "null"
+    },
+    {
+      "id": 4,
+      "group": "Auth",
+      "method": "GET",
+      "url": "/api/v1/auth/me/",
+      "auth": "required",
+      "response_data": "User + has_profile:boolean"
+    },
+    {
+      "id": 5,
+      "group": "Profile",
+      "method": "GET",
+      "url": "/api/v1/profiles/me/",
+      "auth": "required",
+      "response_data": "Profile"
+    },
+    {
+      "id": 6,
+      "group": "Profile",
+      "method": "PUT",
+      "url": "/api/v1/profiles/me/",
+      "auth": "required",
+      "body_fields": ["gender:string(required)", "age:integer(required)", "height:number(required)", "weight:number(required)", "body_type:string(required)", "activity_level:string(required)", "workout_goal:string(required)", "workout_experience:string(required)"],
+      "response_data": "Profile"
+    },
+    {
+      "id": 7,
+      "group": "Profile",
+      "method": "GET",
+      "url": "/api/v1/profiles/me/calorie-target/",
+      "auth": "required",
+      "response_data": "{recommended_calories,carbohydrate_ratio,protein_ratio,fat_ratio,recommended_carbohydrate,recommended_protein,recommended_fat}"
+    },
+    {
+      "id": 8,
+      "group": "BodyRecord",
+      "method": "GET",
+      "url": "/api/v1/body-records/",
+      "auth": "required",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "start_date:date(optional)", "end_date:date(optional)"],
+      "response_data": "Pagination<BodyRecord>"
+    },
+    {
+      "id": 9,
+      "group": "BodyRecord",
+      "method": "POST",
+      "url": "/api/v1/body-records/",
+      "auth": "required",
+      "body_fields": ["record_date:date(required)", "weight:number|null(optional)", "body_fat_percentage:number|null(optional)", "skeletal_muscle_mass:number|null(optional)"],
+      "response_data": "BodyRecord"
+    },
+    {
+      "id": 10,
+      "group": "BodyRecord",
+      "method": "PATCH",
+      "url": "/api/v1/body-records/{body_record_id}/",
+      "auth": "required owner",
+      "body_fields": ["record_date:date(optional)", "weight:number|null(optional)", "body_fat_percentage:number|null(optional)", "skeletal_muscle_mass:number|null(optional)"],
+      "response_data": "BodyRecord"
+    },
+    {
+      "id": 11,
+      "group": "BodyRecord",
+      "method": "DELETE",
+      "url": "/api/v1/body-records/{body_record_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 12,
+      "group": "Food",
+      "method": "GET",
+      "url": "/api/v1/foods/",
+      "auth": "optional",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "category:string(optional)", "source:all|default|my(optional, default all)", "mine:true(optional, legacy alias for source=my)"],
+      "response_data": "Pagination<Food>"
+    },
+    {
+      "id": 13,
+      "group": "Food",
+      "method": "POST",
+      "url": "/api/v1/foods/",
+      "auth": "required",
+      "body_fields": ["name:string(required)", "category:string(required)", "calories:number(required)", "carbohydrate:number|null(optional)", "protein:number|null(optional)", "fat:number|null(optional)"],
+      "response_data": "Food"
+    },
+    {
+      "id": 14,
+      "group": "Food",
+      "method": "GET",
+      "url": "/api/v1/foods/{food_id}/",
+      "auth": "optional",
+      "response_data": "Food"
+    },
+    {
+      "id": 15,
+      "group": "Food",
+      "method": "PATCH",
+      "url": "/api/v1/foods/{food_id}/",
+      "auth": "required owner custom food",
+      "body_fields": ["Food writable fields, all optional"],
+      "response_data": "Food"
+    },
+    {
+      "id": 16,
+      "group": "Food",
+      "method": "DELETE",
+      "url": "/api/v1/foods/{food_id}/",
+      "auth": "required owner custom food",
+      "response_data": "null"
+    },
+    {
+      "id": 17,
+      "group": "Meal",
+      "method": "GET",
+      "url": "/api/v1/meals/",
+      "auth": "required",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "meal_type:string(optional)", "meal_label:string contains(optional)"],
+      "response_data": "Pagination<Meal>"
+    },
+    {
+      "id": 18,
+      "group": "Meal",
+      "method": "POST",
+      "url": "/api/v1/meals/",
+      "auth": "required",
+      "body_fields": ["meal_type:string(required)", "intake_date:date(required)", "items:[{food_id:integer,amount:number}](required, non-empty)"],
+      "response_data": "Meal"
+    },
+    {
+      "id": 19,
+      "group": "Meal",
+      "method": "GET",
+      "url": "/api/v1/meals/{meal_id}/",
+      "auth": "required owner",
+      "response_data": "Meal"
+    },
+    {
+      "id": 20,
+      "group": "Meal",
+      "method": "PATCH",
+      "url": "/api/v1/meals/{meal_id}/",
+      "auth": "required owner",
+      "body_fields": ["meal_type:string(optional)", "intake_date:date(optional)", "items:[{food_id,amount}](optional, replaces all items)"],
+      "response_data": "Meal"
+    },
+    {
+      "id": 21,
+      "group": "Meal",
+      "method": "DELETE",
+      "url": "/api/v1/meals/{meal_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 22,
+      "group": "MealDashboard",
+      "method": "GET",
+      "url": "/api/v1/meals/dashboard/",
+      "auth": "required",
+      "query": ["date:date(optional, default today)"],
+      "response_data": "{date,meal totals,calorie target fields,remaining_calories,meal_type_summary}"
+    },
+    {
+      "id": 23,
+      "group": "SavedMeal",
+      "method": "GET",
+      "url": "/api/v1/saved-meals/",
+      "auth": "required",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string in name|description(optional)"],
+      "response_data": "Pagination<SavedMeal>"
+    },
+    {
+      "id": 24,
+      "group": "SavedMeal",
+      "method": "POST",
+      "url": "/api/v1/saved-meals/",
+      "auth": "required",
+      "body_fields": ["name:string(required)", "description:string(optional)", "items:[{food_id:integer,amount:number}](required, non-empty)"],
+      "response_data": "SavedMeal"
+    },
+    {
+      "id": 25,
+      "group": "SavedMeal",
+      "method": "GET",
+      "url": "/api/v1/saved-meals/{saved_meal_id}/",
+      "auth": "required owner",
+      "response_data": "SavedMeal"
+    },
+    {
+      "id": 26,
+      "group": "SavedMeal",
+      "method": "PATCH",
+      "url": "/api/v1/saved-meals/{saved_meal_id}/",
+      "auth": "required owner",
+      "body_fields": ["name:string(optional)", "description:string(optional)", "items:[{food_id,amount}](optional, replaces all items)"],
+      "response_data": "SavedMeal"
+    },
+    {
+      "id": 27,
+      "group": "SavedMeal",
+      "method": "DELETE",
+      "url": "/api/v1/saved-meals/{saved_meal_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 28,
+      "group": "SavedMeal",
+      "method": "POST",
+      "url": "/api/v1/saved-meals/{saved_meal_id}/create-meal/",
+      "auth": "required owner",
+      "body_fields": ["meal_type:string(required)", "intake_date:date(required)"],
+      "response_data": "Meal"
+    },
+    {
+      "id": 29,
+      "group": "Exercise",
+      "method": "GET",
+      "url": "/api/v1/exercises/",
+      "auth": "optional",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "body_part:string(optional)", "equipment:string(optional)", "target_muscle:string(optional)", "source:all|default|my(optional, default all)"],
+      "response_data": "Pagination<Exercise>"
+    },
+    {
+      "id": 30,
+      "group": "Exercise",
+      "method": "POST",
+      "url": "/api/v1/exercises/",
+      "auth": "required",
+      "body_fields": ["name:string(required)", "gif_url:url|null(optional)", "body_parts:string[](required, non-empty)", "equipments:string[](required, non-empty)", "target_muscles:string[](required, non-empty)", "secondary_muscles:string[](optional)", "instructions:string[](required, non-empty)"],
+      "response_data": "Exercise"
+    },
+    {
+      "id": 31,
+      "group": "Exercise",
+      "method": "GET",
+      "url": "/api/v1/exercises/{pk}/",
+      "auth": "optional",
+      "response_data": "Exercise"
+    },
+    {
+      "id": 32,
+      "group": "Exercise",
+      "method": "PATCH",
+      "url": "/api/v1/exercises/{pk}/",
+      "auth": "required owner custom exercise",
+      "body_fields": ["Exercise writable fields, all optional; id and external exercise_id are read-only"],
+      "response_data": "Exercise"
+    },
+    {
+      "id": 33,
+      "group": "Exercise",
+      "method": "DELETE",
+      "url": "/api/v1/exercises/{pk}/",
+      "auth": "required owner custom exercise",
+      "response_data": "null"
+    },
+    {
+      "id": 34,
+      "group": "WorkoutRoutine",
+      "method": "GET",
+      "url": "/api/v1/workout-routines/",
+      "auth": "required",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string in name|description(optional)"],
+      "response_data": "Pagination<WorkoutRoutine>"
+    },
+    {
+      "id": 35,
+      "group": "WorkoutRoutine",
+      "method": "POST",
+      "url": "/api/v1/workout-routines/",
+      "auth": "required",
+      "body_fields": ["name:string(required)", "description:string(optional)", "items:not accepted"],
+      "response_data": "WorkoutRoutine"
+    },
+    {
+      "id": 36,
+      "group": "WorkoutRoutine",
+      "method": "GET",
+      "url": "/api/v1/workout-routines/{routine_id}/",
+      "auth": "required owner",
+      "response_data": "WorkoutRoutine"
+    },
+    {
+      "id": 37,
+      "group": "WorkoutRoutine",
+      "method": "PATCH",
+      "url": "/api/v1/workout-routines/{routine_id}/",
+      "auth": "required owner",
+      "body_fields": ["name:string(optional)", "description:string(optional)", "items:not accepted"],
+      "response_data": "WorkoutRoutine"
+    },
+    {
+      "id": 38,
+      "group": "WorkoutRoutine",
+      "method": "DELETE",
+      "url": "/api/v1/workout-routines/{routine_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 39,
+      "group": "RoutineItem",
+      "method": "POST",
+      "url": "/api/v1/workout-routines/{routine_id}/items/",
+      "auth": "required owner routine",
+      "body_fields": ["exercise_id:integer(required, Exercise DB PK)", "order:integer>=1(required)", "sets:integer>=1(required)", "reps:integer>=1(required)", "weight:number>=0(required)", "rest_seconds:integer>=0(required)"],
+      "response_data": "RoutineItem"
+    },
+    {
+      "id": 40,
+      "group": "RoutineItem",
+      "method": "PATCH",
+      "url": "/api/v1/routine-items/{routine_item_id}/",
+      "auth": "required owner routine",
+      "body_fields": ["RoutineItem input fields, all optional"],
+      "response_data": "RoutineItem"
+    },
+    {
+      "id": 41,
+      "group": "RoutineItem",
+      "method": "DELETE",
+      "url": "/api/v1/routine-items/{routine_item_id}/",
+      "auth": "required owner routine",
+      "response_data": "null"
+    },
+    {
+      "id": 42,
+      "group": "WorkoutLog",
+      "method": "GET",
+      "url": "/api/v1/workout-logs/",
+      "auth": "required",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "date:date(optional)", "start_date:date(optional)", "end_date:date(optional)", "workout_id:integer(optional)", "routine_id:integer(optional)", "exercise_id:integer(optional, legacy alias)"],
+      "response_data": "Pagination<WorkoutLog>"
+    },
+    {
+      "id": 43,
+      "group": "WorkoutLog",
+      "method": "POST",
+      "url": "/api/v1/workout-logs/",
+      "auth": "required",
+      "body_fields": ["workout_id:integer(required, Exercise DB PK; exercise_id legacy alias accepted)", "routine_id:integer|null(optional, owner routine)", "workout_date:date(required)", "workout_time:integer|null(optional)", "memo:string(optional, never used by AI)", "sets:[{set_order,weight_kg?,repetition?,duration_seconds?,rpe?,is_warmup?}](required, min 1)", "set_count/repetition(optional legacy summary)"],
+      "response_data": "WorkoutLog"
+    },
+    {
+      "id": 44,
+      "group": "WorkoutLog",
+      "method": "GET",
+      "url": "/api/v1/workout-logs/{log_id}/",
+      "auth": "required owner",
+      "response_data": "WorkoutLog"
+    },
+    {
+      "id": 45,
+      "group": "WorkoutLog",
+      "method": "PATCH",
+      "url": "/api/v1/workout-logs/{log_id}/",
+      "auth": "required owner",
+      "body_fields": ["workout_date:date(optional)", "workout_time:integer|null(optional)", "memo:string(optional)", "sets:WorkoutLogSet[](optional, replaces all sets)"],
+      "response_data": "WorkoutLog"
+    },
+    {
+      "id": 46,
+      "group": "WorkoutLog",
+      "method": "DELETE",
+      "url": "/api/v1/workout-logs/{log_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 47,
+      "group": "Progress",
+      "method": "GET",
+      "url": "/api/v1/progress/",
+      "auth": "required",
+      "query": ["start_date:date(required)", "end_date:date(required)"],
+      "response_data": "Progress"
+    },
+    {
+      "id": 48,
+      "group": "Post",
+      "method": "GET",
+      "url": "/api/v1/posts/",
+      "auth": "optional",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)", "search:string(optional)", "author:string(optional)", "category:diet|workout|free(optional)"],
+      "response_data": "Pagination<Post>"
+    },
+    {
+      "id": 49,
+      "group": "Post",
+      "method": "POST",
+      "url": "/api/v1/posts/",
+      "auth": "required",
+      "body_fields": ["title:string(required)", "content:string(required)", "category:diet|workout|free(required)", "shared_saved_meal_id:integer(optional, diet + owner only)", "shared_workout_routine_id:integer(optional, workout + owner only)"],
+      "response_data": "Post + comments[]"
+    },
+    {
+      "id": 50,
+      "group": "Post",
+      "method": "GET",
+      "url": "/api/v1/posts/{post_id}/",
+      "auth": "optional",
+      "response_data": "Post + comments[]"
+    },
+    {
+      "id": 51,
+      "group": "Post",
+      "method": "PATCH",
+      "url": "/api/v1/posts/{post_id}/",
+      "auth": "required owner",
+      "body_fields": ["title:string(optional)", "content:string(optional)", "category:diet|workout|free(optional)", "shared_saved_meal_id:integer|null(optional, diet + owner only)", "shared_workout_routine_id:integer|null(optional, workout + owner only)"],
+      "response_data": "Post"
+    },
+    {
+      "id": 52,
+      "group": "Post",
+      "method": "DELETE",
+      "url": "/api/v1/posts/{post_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 53,
+      "group": "Comment",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/comments/",
+      "auth": "required",
+      "body_fields": ["content:string(required)"],
+      "response_data": "Comment"
+    },
+    {
+      "id": 54,
+      "group": "Comment",
+      "method": "PATCH",
+      "url": "/api/v1/comments/{comment_id}/",
+      "auth": "required owner",
+      "body_fields": ["content:string(optional)"],
+      "response_data": "Comment"
+    },
+    {
+      "id": 55,
+      "group": "Comment",
+      "method": "DELETE",
+      "url": "/api/v1/comments/{comment_id}/",
+      "auth": "required owner",
+      "response_data": "null"
+    },
+    {
+      "id": 56,
+      "group": "Like",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/like/",
+      "auth": "required",
+      "body_fields": [],
+      "response_data": "{post_id:integer,is_liked:boolean,like_count:integer}"
+    },
+    {
+      "id": 57,
+      "group": "Public Profile",
+      "method": "GET",
+      "url": "/api/v1/users/{user_id}/public-profile/",
+      "auth": "optional",
+      "body_fields": [],
+      "response_data": "PublicProfile"
+    },
+    {
+      "id": 58,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/evaluations/",
+      "auth": "required",
+      "body_fields": ["target_date:date(required; legacy date also accepted)"],
+      "response_data": "DietFeedback",
+      "behavior": "백엔드가 Meal 합계, 권장량, 0~100 점수와 score_detail을 결정하고 GMS는 PT 코치 자연어 피드백만 생성한다."
+    },
+    {
+      "id": 59,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/",
+      "auth": "required",
+      "body_fields": ["scope:meal|day|remaining(optional, default meal)", "message:string(optional)", "target_date:date(required)", "food_source:all|my_fridge|free(optional, default all)", "meal_count:integer(1..6, day only, default 3)", "meal_order:integer(optional)", "meal_label:string(optional)", "meal_type:breakfast|lunch|dinner|snack(optional, legacy)", "exclude_food_ids:integer[](optional)", "preference:string(optional, legacy)"],
+      "response_data": "AIRecommendation diet result"
+    },
+    {
+      "id": 60,
+      "group": "AI Workout",
+      "method": "POST",
+      "url": "/api/v1/ai/workout/recommendations/",
+      "auth": "required",
+      "body_fields": ["message:string(optional)", "target_body_part:string(optional)", "available_time:integer(required)", "exercise_source:all|my_exercises(optional, default all)", "weekly_frequency:integer(optional, legacy)", "preference:string(optional, legacy)"],
+      "response_data": "AIRecommendation workout result"
+    },
+    {
+      "id": 61,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/recommendations/{recommendation_id}/save-meal/",
+      "auth": "required owner",
+      "body_fields": ["meal_type:breakfast|lunch|dinner|snack(required)", "intake_date:date(required)"],
+      "response_data": "Meal"
+    },
+    {
+      "id": 62,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/save/",
+      "auth": "required owner",
+      "body_fields": ["save_target:meals|saved_meal|meal_plan|both(optional, default saved_meal)", "title:string(optional)", "description:string(optional)", "name:string(optional, legacy title alias)"],
+      "response_data": "{save_target,meal_ids?,saved_meal_id?,meal_plan_id?}"
+    },
+    {
+      "id": 63,
+      "group": "AI Save",
+      "method": "POST",
+      "url": "/api/v1/ai/recommendations/{recommendation_id}/save-routine/",
+      "auth": "required owner",
+      "body_fields": ["name:string(required)", "description:string(optional)"],
+      "response_data": "WorkoutRoutine"
+    },
+    {
+      "id": 64,
+      "group": "AI Diet",
+      "method": "GET",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/",
+      "auth": "required owner",
+      "body_fields": [],
+      "response_data": "{recommendation_id,recommendation_scope,food_source,target_date,parent_recommendation_id,is_saved,content,created_at,updated_at}"
+    },
+    {
+      "id": 65,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/replace/",
+      "auth": "required owner",
+      "body_fields": ["meal_order:integer(required)", "replace_food_id:integer(DB mode, one of two)", "replace_ai_food_key:string(free mode, one of two)", "message:string(required)"],
+      "response_data": "new AIRecommendation with recommendation_scope=replacement"
+    },
+    {
+      "id": 66,
+      "group": "AI Diet",
+      "method": "POST",
+      "url": "/api/v1/ai/diet/recommendations/{recommendation_id}/reroll/",
+      "auth": "required owner",
+      "body_fields": ["message:string(required)"],
+      "response_data": "new AIRecommendation with recommendation_scope=reroll"
+    },
+    {
+      "id": 67,
+      "group": "AI Workout",
+      "method": "POST",
+      "url": "/api/v1/ai/workout/progression/",
+      "auth": "required",
+      "body_fields": ["workout_id:integer(required, Exercise DB PK)", "target_date:date(optional, default today)", "goal:string(optional, defaults to profile workout_goal)", "message:string(optional)"],
+      "response_data": "{workout_id,workout_name,target_date,decision,recommendation,recovery_summary,history_summary,reason,safety_note}"
+    },
+    {
+      "id": 68,
+      "group": "Community Share",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/save-shared-meal/",
+      "auth": "required",
+      "body_fields": [],
+      "response_data": "{saved_meal_id:integer,name:string,already_saved:boolean}",
+      "behavior": "게시글의 공유 식단 snapshot으로 요청 사용자 소유 SavedMeal과 SavedMealItem을 복사한다. 같은 사용자의 중복 요청은 기존 복사본을 반환한다."
+    },
+    {
+      "id": 69,
+      "group": "Community Share",
+      "method": "POST",
+      "url": "/api/v1/posts/{post_id}/save-shared-routine/",
+      "auth": "required",
+      "body_fields": [],
+      "response_data": "{routine_id:integer,name:string,already_saved:boolean}",
+      "behavior": "게시글의 공유 루틴 snapshot으로 요청 사용자 소유 WorkoutRoutine과 RoutineItem을 복사한다. 같은 사용자의 중복 요청은 기존 복사본을 반환한다."
+    },
+    {
+      "id": 70,
+      "group": "Comment",
+      "method": "GET",
+      "url": "/api/v1/posts/{post_id}/comments/",
+      "auth": "none",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)"],
+      "response_data": "Pagination<Comment>",
+      "behavior": "댓글은 created_at, id 오름차순이다. 기존 Post 상세의 comments 배열은 하위 호환을 위해 유지한다."
+    },
+    {
+      "id": 71,
+      "group": "AI Chat",
+      "method": "GET",
+      "url": "/api/v1/ai/chats/",
+      "auth": "required owner",
+      "query": ["page:integer>=1(optional, default 1)", "page_size:integer 1..100(optional, default 20)"],
+      "response_data": "Pagination<AIChat>",
+      "behavior": "현재 사용자의 채팅만 최신순으로 반환하며 GMS를 호출하지 않는다."
+    },
+    {
+      "id": 72,
+      "group": "AI Chat",
+      "method": "POST",
+      "url": "/api/v1/ai/chats/",
+      "auth": "required",
+      "body_fields": ["question:string(required, max 2000)"],
+      "response_data": "AIChat",
+      "behavior": "최근 내 채팅 최대 5개와 원본 질문을 AI guardrail에 전달한다. 허용 시 PT 코치 답변을 생성하고, 차단 시 고정 안전 문구를 answer로 저장한다."
+    },
+    {
+      "id": 73,
+      "group": "MealItem",
+      "method": "POST",
+      "url": "/api/v1/meals/{meal_id}/items/",
+      "auth": "required owner",
+      "body_fields": ["food_id:integer(required, accessible Food PK)", "amount:float>0(required, grams)"],
+      "response_data": "MealItem",
+      "behavior": "항목을 추가한 뒤 Meal 영양 합계를 다시 계산한다."
+    },
+    {
+      "id": 74,
+      "group": "MealItem",
+      "method": "PATCH",
+      "url": "/api/v1/meal-items/{meal_item_id}/",
+      "auth": "required owner",
+      "body_fields": ["amount:float>0(required, grams)"],
+      "response_data": "MealItem",
+      "behavior": "섭취량과 영양값을 수정한 뒤 Meal 영양 합계를 다시 계산한다."
+    },
+    {
+      "id": 75,
+      "group": "MealItem",
+      "method": "DELETE",
+      "url": "/api/v1/meal-items/{meal_item_id}/",
+      "auth": "required owner",
+      "response_data": "null",
+      "behavior": "마지막 항목은 삭제할 수 없으며 삭제 후 Meal 영양 합계를 다시 계산한다."
+    },
+    {
+      "id": 76,
+      "group": "Diet Feedback",
+      "method": "GET",
+      "url": "/api/v1/diet-feedbacks/",
+      "auth": "required owner",
+      "query": ["date:date(optional)", "start_date:date(optional)", "end_date:date(optional)"],
+      "response_data": "DietFeedback[]",
+      "behavior": "현재 사용자의 저장된 식단 평가만 최신 날짜순으로 반환하며 GMS를 호출하지 않는다."
+    }
+  ],
+  "planned_endpoints": []
+}
